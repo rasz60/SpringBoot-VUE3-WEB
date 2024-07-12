@@ -85,7 +85,7 @@ export default {};
     .headerBtn {
       height: 100%;
       border-radius: 2em;
-      font-size: 1.5em;
+      font-size: 1.3em;
     }
   }
 }

@@ -5,4 +5,7 @@ module.exports = defineConfig({
   outputDir: "../src/main/resources/static",
   transpileDependencies: true,
   indexPath: "index.html",
+  devServer: {
+    proxy: "http://localhost:8082",
+  },
 });

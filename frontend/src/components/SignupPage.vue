@@ -4,19 +4,22 @@
       <v-col cols="11">
         <v-text-field
           label="* ID"
-          v-model="member.mId"
+          v-model="member.memId"
           :rules="idRules"
         ></v-text-field>
       </v-col>
       <v-col cols="1" class="btnCols">
-        <v-btn prepend-icon="mdi-account-check-outline">중복확인</v-btn>
+        <v-btn prepend-icon="mdi-account-check-outline" @click="fnIdDupChk"
+          >중복확인</v-btn
+        >
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
         <v-text-field
+          type="password"
           label="* Password"
-          v-model="member.mPw"
+          v-model="member.memPw"
           :rules="pwRules"
         ></v-text-field>
       </v-col>
@@ -24,6 +27,7 @@
     <v-row>
       <v-col cols="12">
         <v-text-field
+          type="password"
           label="* Password Check"
           v-model="pwChk"
           :rules="pwChkRules"
@@ -34,7 +38,7 @@
       <v-col cols="11">
         <v-text-field
           label="* e-mail"
-          v-model="member.mEmail"
+          v-model="member.memEmail"
           :rules="emailRules"
         ></v-text-field>
       </v-col>
@@ -44,7 +48,7 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field label="Phone"></v-text-field>
+        <v-text-field label="Phone" v-model="member.memPhone"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -56,7 +60,11 @@
         ></v-text-field>
       </v-col>
       <v-col cols="1" class="btnCols">
-        <v-btn prepend-icon="mdi-map-marker-outline">주소찾기</v-btn>
+        <v-btn
+          prepend-icon="mdi-map-marker-outline"
+          @click.stop="execDaumPostcode"
+          >주소찾기</v-btn
+        >
       </v-col>
     </v-row>
     <v-row>
@@ -64,13 +72,13 @@
         <v-text-field
           label="Address1"
           readonly
-          v-model="member.mAddr1"
+          v-model="member.memAddr1"
         ></v-text-field>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field label="Address2" v-model="member.mAddr2"></v-text-field>
+        <v-text-field label="Address2" v-model="member.memAddr2"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -91,15 +99,20 @@ export default {
   data() {
     return {
       member: {
-        mId: "",
-        mPw: "",
-        mEmail: "",
-        mPhone: "",
+        memId: "rassayz60",
+        memPw: "sixxrasz60!@",
+        memEmail: "rassayzsixt@gmail.com",
+        memPhone: "01021138583",
         zipcode: "",
-        mAddr1: "",
-        mAddr2: "",
+        memAddr1: "",
+        memAddr2: "",
       },
-      pwChk: "",
+      pwChk: "sixxrasz60!@",
+      chk: {
+        idDupChkd: false,
+        pwChkd: false,
+        emailChkd: false,
+      },
     };
   },
   computed: {
@@ -152,7 +165,7 @@ export default {
       rules.push(nullchk);
 
       const pwChk = (v) => {
-        if (v == this.member.mPw) return true;
+        if (v == this.member.memPw) return true;
         return "비밀번호를 확인해주세요.";
       };
       rules.push(pwChk);
@@ -179,15 +192,102 @@ export default {
       return rules;
     },
   },
+  mounted() {
+    this.loadDaumPostcodeScript();
+  },
   methods: {
-    validate() {
-      let chk = this.$refs.signupFrm.validate();
-      if (chk.valid) this.frmSubmit();
+    fnIdDupChk() {
+      var chk = false;
+      for (var i = 0; i < this.idRules.length; i++) {
+        chk = this.idRules[i](this.member.memId);
+      }
+
+      if (chk) {
+        this.axios
+          .get("/signup/idDupChk/" + this.member.memId)
+          .then((res) => {
+            if (res.data > 0) {
+              alert("중복되는 아이디가 존재합니다.");
+            } else {
+              alert("사용 가능한 아이디 입니다.");
+              this.idDupChkd = true;
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } else {
+        alert("형식에 맞는 id를 입력해주세요.");
+      }
+    },
+    // 다음 주소 api script tag 추가
+    loadDaumPostcodeScript() {
+      const script = document.createElement("script");
+      // 다음 주소 api cdn
+      script.src =
+        "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+      script.onload = () => {
+        this.isScriptLoaded = true; // 스크립트가 로드되면 isScriptLoaded를 true로 설정
+      };
+      document.head.appendChild(script);
     },
 
-    frmSubmit() {
-      if (confirm("회원으로 가입할까요?"))
-        this.axios.post("/signup", JSON.stringify(this.member)).then().error();
+    // 다음 주소 검색 호출
+    execDaumPostcode() {
+      if (window.daum && window.daum.Postcode) {
+        // 팝업 호출
+        this.popup = new window.daum.Postcode({
+          oncomplete: (data) => {
+            // 우편번호 검색 완료 후의 처리 로직
+            this.member.zipcode = data.zonecode;
+            this.member.memAddr1 = data.address;
+          },
+        });
+
+        this.popup.open();
+      }
+      // 오류 처리
+      else {
+        console.error("Daum Postcode 스크립트가 로드되지 않았습니다.");
+      }
+    },
+    async validate() {
+      let chk = await this.$refs.signupFrm.validate();
+
+      chk = chk.valid ? 0 : -1;
+      console.log(chk);
+      if (chk == 0) {
+        console.log(this.chk);
+      }
+      console.log(chk);
+
+      if (chk == 0) this.frmSubmit();
+      else if (chk == 1) alert("아이디 중복을 확인해주세요.");
+      else if (chk == 2) alert("비밀번호를 확인해주세요.");
+      else if (chk == 3) alert("이메일 인증을 확인해주세요.");
+      else alert("가입 정보를 다시 확인해주세요.");
+    },
+
+    async frmSubmit() {
+      if (confirm("회원으로 가입할까요?")) {
+        await this.axios
+          .post("/signup", this.member)
+          .then((res) => {
+            alert(res.data + "님의 가입을 환영합니다!");
+          })
+          .catch((err) => console.log(err));
+      }
+    },
+  },
+  watch: {
+    memId() {
+      this.idDupChk = false;
+    },
+    memPw(v) {
+      this.chk.pwChkd = v == this.pwChk;
+    },
+    pwChk(v) {
+      this.chk.pwChkd = v == this.member.memPw;
     },
   },
 };
