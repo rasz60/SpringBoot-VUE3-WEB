@@ -2,6 +2,7 @@ package com.example.rmfr.member.dto;
 
 import com.example.rmfr.member.entity.Members;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;

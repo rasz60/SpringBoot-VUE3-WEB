@@ -27,4 +27,9 @@ public class MemberRestController {
     public String signup(@RequestBody MemberDto memberDto) {
         return memberService.signup(memberDto);
     }
+
+    @GetMapping("/signup/verifyCode/{memEmail}")
+    public Map<String, Object> verifyCode(@PathVariable("memEmail") String memEmail) {
+        return memberService.sendVerifyCode(memEmail);
+    }
 }

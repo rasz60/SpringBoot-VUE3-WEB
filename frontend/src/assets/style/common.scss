@@ -9,3 +9,9 @@ $min-height: 85vh;
 body {
   font-family: $font-stack;
 }
+
+@import "views/header";
+@import "views/content";
+
+@import "components/main";
+@import "components/signup";
