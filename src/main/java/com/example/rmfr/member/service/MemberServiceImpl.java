@@ -23,24 +23,25 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.countByMemId(memId);
     }
 
-    @Transactional
-    @Override
-    public String signup(MemberDto memberDto) {
-        String rst = "";
-        try {
-            rst = memberRepository.save(Members.builder().memberDto(memberDto).build()).getMemId();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return rst;
-    }
-
     @Override
     public Map<String, Object> sendVerifyCode(String memEmail) {
         Map<String, Object> rst = null;
         String code = createVerifyCode();
         try {
             rst = mailUtils.sendEmail(memEmail, code);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return rst;
+    }
+
+
+    @Transactional
+    @Override
+    public String signup(MemberDto memberDto) {
+        String rst = "";
+        try {
+            rst = memberRepository.save(Members.builder().memberDto(memberDto).build()).getMemId();
         } catch (Exception e) {
             e.printStackTrace();
         }

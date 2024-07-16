@@ -43,13 +43,17 @@ export default {
 
     const nullchk = (v) => {
       if (v) return true;
-      return "비빌번호를 확인해주세요.";
+      else return "비빌번호를 확인해주세요.";
     };
     rules.push(nullchk);
 
     const pwChk = (v) => {
-      if (v == this.member.memPw) return true;
-      return "비밀번호를 확인해주세요.";
+      if (this.memPw != "" && v == this.memPw) {
+        this.chk.pwChkd = true;
+        return true;
+      } else {
+        return "비밀번호를 확인해주세요.";
+      }
     };
     rules.push(pwChk);
 

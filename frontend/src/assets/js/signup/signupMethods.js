@@ -1,5 +1,22 @@
 let timer = null;
 export default {
+  init() {
+    this.memId = "";
+    this.memPw = "";
+    this.memEmail = "";
+    this.memPhone = "";
+    this.zipcode = "";
+    this.memAddr1 = "";
+    this.memAddr2 = "";
+    this.pwChk = "";
+    this.chk.idDupChkd = false;
+    this.chk.pwChkd = false;
+    this.chk.emailChkd = false;
+    this.overlay = false;
+    this.limitTime = 179;
+    this.verifyCode = "";
+    this.otp = "";
+  },
   fnRuleChk(type) {
     var rules = null;
     var value = "";
@@ -8,19 +25,19 @@ export default {
     switch (type) {
       case 0:
         rules = this.idRules;
-        value = this.member.memId;
+        value = this.memId;
         break;
       case 1:
         rules = this.pwRules;
-        value = this.member.memPw;
+        value = this.memPw;
         break;
       case 2:
         rules = this.pwChkRules;
-        value = this.member.pwChk;
+        value = this.pwChk;
         break;
       default:
         rules = this.emailRules;
-        value = this.member.memEmail;
+        value = this.memEmail;
         break;
     }
 
@@ -40,13 +57,13 @@ export default {
 
     if (chk) {
       this.axios
-        .get("/signup/idDupChk/" + this.member.memId)
+        .get("/rest/signup/idDupChk/" + this.memId)
         .then((res) => {
           if (res.data > 0) {
             alert("중복되는 아이디가 존재합니다.");
           } else {
             alert("사용 가능한 아이디 입니다.");
-            this.idDupChkd = true;
+            this.chk.idDupChkd = true;
           }
         })
         .catch((err) => {
@@ -65,7 +82,7 @@ export default {
       if (chk) timer = this.fnSetTimer(); // set timer
     } else {
       if (confirm("인증이 완료된 메일을 변경할까요?")) {
-        this.member.memEmail = "";
+        this.memEmail = "";
         this.otp = "";
         this.verifyCode = "";
         this.chk.emailChkd = false;
@@ -83,7 +100,7 @@ export default {
   async fnSendVerifyCode() {
     var chk = false;
     await this.axios
-      .get("/signup/verifyCode/" + this.member.memEmail)
+      .get("/rest/signup/verifyCode/" + this.memEmail)
       .then((res) => {
         this.verifyCode = res.data.token;
         chk = true;
@@ -122,7 +139,7 @@ export default {
   /* valid code start */
   fnValidCode() {
     var otp = window.btoa(this.otp);
-
+    console.log(otp, this.verifyCode);
     if (this.verifyCode == otp) {
       alert("이메일 인증이 완료되었습니다.");
       this.chk.emailChkd = true;
@@ -151,8 +168,8 @@ export default {
       this.popup = new window.daum.Postcode({
         oncomplete: (data) => {
           // 우편번호 검색 완료 후의 처리 로직
-          this.member.zipcode = data.zonecode;
-          this.member.memAddr1 = data.address;
+          this.zipcode = data.zonecode;
+          this.memAddr1 = data.address;
         },
       });
 
@@ -166,21 +183,35 @@ export default {
   async fnValidate() {
     let chk = await this.$refs.signupFrm.validate();
 
-    chk = chk.valid ? 0 : -1;
+    if (chk.valid) {
+      chk = !this.chk.idDupChkd ? 1 : !this.chk.emailChkd ? 3 : 0;
+    } else {
+      chk = !this.chk.pwChkd ? 2 : -1;
+    }
 
     if (chk == 0) this.fnFrmSubmit();
     else if (chk == 1) alert("아이디 중복을 확인해주세요.");
     else if (chk == 2) alert("비밀번호를 확인해주세요.");
-    else if (chk == 3) alert("이메일 인증을 확인해주세요.");
+    else if (chk == 3) alert("이메일을 인증해주세요.");
     else alert("가입 정보를 다시 확인해주세요.");
   },
 
   async fnFrmSubmit() {
     if (confirm("회원으로 가입할까요?")) {
+      var data = {
+        memId: this.memId,
+        memPw: this.memPw,
+        memEmail: this.memEmail,
+        memPhone: this.memPhone,
+        zipcode: this.zipcode,
+        memAddr1: this.memAddr1,
+        memAddr2: this.memAddr2,
+      };
       await this.axios
-        .post("/signup", this.member)
+        .post("/rest/signup", data)
         .then((res) => {
           alert(res.data + "님의 가입을 환영합니다!");
+          this.$router.push("/");
         })
         .catch((err) => console.log(err));
     }

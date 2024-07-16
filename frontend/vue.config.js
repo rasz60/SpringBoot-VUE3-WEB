@@ -6,6 +6,11 @@ module.exports = defineConfig({
   transpileDependencies: true,
   indexPath: "index.html",
   devServer: {
-    proxy: "http://localhost:8082",
+    proxy: {
+      "/rest": {
+        target: "http://localhost:8082",
+        changeOrigin: true,
+      },
+    },
   },
 });

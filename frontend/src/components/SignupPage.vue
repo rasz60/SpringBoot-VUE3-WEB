@@ -12,7 +12,7 @@
 
       <h3 class="text-h6 mb-4">Email Verified</h3>
       <div class="text-body-2">
-        {{ member.memEmail }}로 발송된 인증번호를 <br />아래 칸에 입력해주세요.
+        {{ memEmail }}로 발송된 인증번호를 <br />아래 칸에 입력해주세요.
       </div>
 
       <div class="py-3">
@@ -44,12 +44,18 @@
       <v-col cols="11">
         <v-text-field
           label="* ID"
-          v-model="member.memId"
+          v-model="memId"
           :rules="idRules"
         ></v-text-field>
       </v-col>
       <v-col cols="1" class="btnCols">
-        <v-btn prepend-icon="mdi-account-check-outline" @click="fnIdDupChk"
+        <v-btn
+          :prepend-icon="
+            chk.idDupChkd ? `mdi-account-check` : `mdi-account-check-outline`
+          "
+          :variant="chk.idDupChkd ? `tonal` : `elevated`"
+          :color="chk.idDupChkd ? `primary` : ``"
+          @click="fnIdDupChk"
           >중복확인</v-btn
         >
       </v-col>
@@ -59,7 +65,7 @@
         <v-text-field
           type="password"
           label="* Password"
-          v-model="member.memPw"
+          v-model="memPw"
           :rules="pwRules"
         ></v-text-field>
       </v-col>
@@ -78,7 +84,7 @@
       <v-col cols="11">
         <v-text-field
           label="* e-mail"
-          v-model="member.memEmail"
+          v-model="memEmail"
           :rules="emailRules"
           :readonly="chk.emailChkd"
         ></v-text-field>
@@ -88,6 +94,8 @@
           :prepend-icon="
             chk.emailChkd ? `mdi-email-check` : `mdi-email-check-outline`
           "
+          :variant="chk.emailChkd ? `tonal` : `elevated`"
+          :color="chk.emailChkd ? `primary` : `default`"
           @click="fnMailVerify"
           :text="chk.emailChkd ? `인증완료` : `인증하기`"
         ></v-btn>
@@ -95,16 +103,12 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field label="Phone" v-model="member.memPhone"></v-text-field>
+        <v-text-field label="Phone" v-model="memPhone"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="11">
-        <v-text-field
-          label="Zipcode"
-          readonly
-          v-model="member.zipcode"
-        ></v-text-field>
+        <v-text-field label="Zipcode" readonly v-model="zipcode"></v-text-field>
       </v-col>
       <v-col cols="1" class="btnCols">
         <v-btn
@@ -119,13 +123,13 @@
         <v-text-field
           label="Address1"
           readonly
-          v-model="member.memAddr1"
+          v-model="memAddr1"
         ></v-text-field>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field label="Address2" v-model="member.memAddr2"></v-text-field>
+        <v-text-field label="Address2" v-model="memAddr2"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -150,6 +154,9 @@ export default {
   data() {
     return signupData;
   },
+  created() {
+    this.init();
+  },
   mounted() {
     this.fnLoadDaumPostcodeScript();
   },
@@ -163,7 +170,7 @@ export default {
       this.chk.pwChkd = v == this.pwChk;
     },
     pwChk(v) {
-      this.chk.pwChkd = v == this.member.memPw;
+      this.chk.pwChkd = v == this.memPw;
     },
   },
 };

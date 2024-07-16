@@ -16,20 +16,18 @@ public class MemberRestController {
 
     private final MemberService memberService;
 
-    @GetMapping("/signup/idDupChk/{memId}")
+    @GetMapping("/rest/signup/idDupChk/{memId}")
     public Long idDupChk(@PathVariable("memId") String memId) {
         return memberService.idDupChk(memId);
     }
-
-
-    @PostMapping("/signup")
+    @GetMapping("/rest/signup/verifyCode/{memEmail}")
+    public Map<String, Object> verifyCode(@PathVariable("memEmail") String memEmail) {
+        return memberService.sendVerifyCode(memEmail);
+    }
+    @PostMapping("/rest/signup")
     @ResponseBody
     public String signup(@RequestBody MemberDto memberDto) {
         return memberService.signup(memberDto);
     }
 
-    @GetMapping("/signup/verifyCode/{memEmail}")
-    public Map<String, Object> verifyCode(@PathVariable("memEmail") String memEmail) {
-        return memberService.sendVerifyCode(memEmail);
-    }
 }

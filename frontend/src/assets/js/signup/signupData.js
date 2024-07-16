@@ -1,13 +1,11 @@
 export default {
-  member: {
-    memId: "",
-    memPw: "",
-    memEmail: "",
-    memPhone: "",
-    zipcode: "",
-    memAddr1: "",
-    memAddr2: "",
-  },
+  memId: "",
+  memPw: "",
+  memEmail: "",
+  memPhone: "",
+  zipcode: "",
+  memAddr1: "",
+  memAddr2: "",
   pwChk: "",
   chk: {
     idDupChkd: false,
