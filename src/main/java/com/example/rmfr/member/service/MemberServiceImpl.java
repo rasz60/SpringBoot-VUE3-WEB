@@ -7,6 +7,7 @@ import com.example.rmfr.utils.MailUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Base64Util;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -29,6 +30,11 @@ public class MemberServiceImpl implements MemberService {
         String code = createVerifyCode();
         try {
             rst = mailUtils.sendEmail(memEmail, code);
+
+            if ( (int) rst.get("resultCode") == 200 ) {
+                String base64ValidCode = Base64Util.encode(code);
+                rst.put("token", base64ValidCode);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
