@@ -1,4 +1,3 @@
-let timer = null;
 export default {
   init() {
     this.memId = "";
@@ -77,9 +76,7 @@ export default {
     var chk = this.chk.emailChkd;
     if (!chk) {
       chk = this.fnRuleChk(3); // check rules
-      if (chk) chk = await this.fnSendVerifyCode(); // send code
       if (chk) this.overlay = true; // open overlay
-      if (chk) timer = this.fnSetTimer(); // set timer
     } else {
       if (confirm("인증이 완료된 메일을 변경할까요?")) {
         this.memEmail = "";
@@ -89,66 +86,6 @@ export default {
       }
     }
   },
-  async fnVerifyReset() {
-    this.fnDelTimer(-1); // del timer
-    if (await this.fnSendVerifyCode() /* send code */) {
-      alert("인증번호를 재전송하였습니다.");
-      timer = this.fnSetTimer(); // set timer
-    }
-  },
-  /* send code start */
-  async fnSendVerifyCode() {
-    var chk = false;
-    await this.axios
-      .get("/rest/signup/verifyCode/" + this.memEmail)
-      .then((res) => {
-        this.verifyCode = res.data.token;
-        chk = true;
-      })
-      .catch(() => {
-        alert("다시 시도해주세요.");
-      });
-    return chk;
-  },
-  /* send code end */
-  /* timer start */
-  fnSetTimer() {
-    var time = this.limitTime;
-    let interval = setInterval(function () {
-      if (time == 0) {
-        alert("인증시간이 만료되었습니다.");
-        clearInterval(timer);
-      }
-      var timerSpan = document.querySelector("#timer");
-      var m = "0" + Math.floor(time / 60);
-      var s = Math.floor(time % 60);
-      s = s < 10 ? "0" + s : s;
-      timerSpan.innerHTML = m + ":" + s;
-      time--;
-    }, 1000);
-    return interval;
-  },
-  fnDelTimer(type) {
-    clearInterval(timer);
-    if (type != -1) {
-      this.verifyCode = "";
-      this.overlay = false;
-    }
-  },
-  /* timer end */
-  /* valid code start */
-  fnValidCode() {
-    var otp = window.btoa(this.otp);
-    console.log(otp, this.verifyCode);
-    if (this.verifyCode == otp) {
-      alert("이메일 인증이 완료되었습니다.");
-      this.chk.emailChkd = true;
-      this.fnDelTimer();
-    } else {
-      alert("인증번호를 다시 확인해주세요.");
-    }
-  },
-  /* valid code end */
   // 다음 주소 api script tag 추가
   fnLoadDaumPostcodeScript() {
     const script = document.createElement("script");
@@ -215,5 +152,9 @@ export default {
         })
         .catch((err) => console.log(err));
     }
+  },
+  fnChildMessage(obj) {
+    this.overlay = obj.overlay;
+    this.chk.emailChkd = obj.chkd;
   },
 };

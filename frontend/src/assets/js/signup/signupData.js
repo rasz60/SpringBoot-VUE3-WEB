@@ -13,7 +13,4 @@ export default {
     emailChkd: false,
   },
   overlay: false,
-  limitTime: 179,
-  verifyCode: "",
-  otp: "",
 };

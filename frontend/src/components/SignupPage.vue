@@ -1,43 +1,13 @@
+<script setup>
+import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
+</script>
 <template>
   <v-overlay v-model="overlay" id="overlay" scroll-strategy="block" persistent>
-    <v-card
-      class="py-8 px-6 text-center mx-auto ma-4"
-      max-width="400"
-      width="100%"
-    >
-      <div class="d-flex">
-        <v-spacer></v-spacer>
-        <v-icon icon="mdi-close" @click="fnDelTimer" />
-      </div>
-
-      <h3 class="text-h6 mb-4">Email Verified</h3>
-      <div class="text-body-2">
-        {{ memEmail }}로 발송된 인증번호를 <br />아래 칸에 입력해주세요.
-      </div>
-
-      <div class="py-3">
-        <span id="timer">03:00</span>
-      </div>
-
-      <v-sheet color="surface">
-        <v-otp-input v-model="otp" type="text" variant="solo"></v-otp-input>
-      </v-sheet>
-
-      <v-btn
-        class="my-4"
-        color="purple"
-        height="40"
-        text="Verify"
-        variant="flat"
-        width="70%"
-        @click="fnValidCode"
-      ></v-btn>
-
-      <div class="text-caption">
-        인증번호를 받지 못했나요?
-        <a href="#" @click="fnVerifyReset">다시 발송하기</a>
-      </div>
-    </v-card>
+    <VerifyDialog
+      ref="verifyDialog"
+      @sendMessage="fnChildMessage"
+      :memEmail="memEmail"
+    />
   </v-overlay>
   <v-form @submit.prevent id="signup" ref="signupFrm">
     <v-row>

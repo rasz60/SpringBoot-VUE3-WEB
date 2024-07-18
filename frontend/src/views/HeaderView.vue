@@ -1,3 +1,6 @@
+<script setup>
+import LoginDialog from "@/components/overlay/LoginDialog.vue";
+</script>
 <template>
   <v-overlay
     v-model="loginDisplay"
@@ -5,43 +8,7 @@
     scroll-strategy="block"
     persistent
   >
-    <v-card
-      class="py-8 px-6 text-center mx-auto ma-4"
-      min-width="400"
-      width="100%"
-    >
-      <div class="d-flex">
-        <v-spacer></v-spacer>
-        <v-icon icon="mdi-close" @click="fnLoginDisplayReset" />
-      </div>
-
-      <h3 class="text-h5 mb-4">LOGIN</h3>
-
-      <v-sheet color="surface">
-        <v-text-field variant="underlined" label="ID"></v-text-field>
-        <v-text-field
-          variant="underlined"
-          label="Password"
-          type="password"
-        ></v-text-field>
-      </v-sheet>
-
-      <div class="text-caption">
-        <span class="findInfo" @click.stop="findId = true">아이디 찾기</span>
-        &nbsp;|&nbsp;
-        <span class="findInfo" @click.stop="findPw = true">비밀번호 찾기</span>
-      </div>
-
-      <v-btn
-        class="my-4"
-        color="primary"
-        height="40"
-        text="Login"
-        variant="flat"
-        width="70%"
-        @click="fnValidCode"
-      ></v-btn>
-    </v-card>
+    <LoginDialog @sendMessage="setLoginDisplay" />
   </v-overlay>
 
   <v-layout id="header">
@@ -85,15 +52,11 @@ export default {
   data() {
     return {
       loginDisplay: false,
-      findId: false,
-      findPw: false,
     };
   },
   methods: {
-    fnLoginDisplayReset() {
-      this.loginDisplay = false;
-      this.findId = false;
-      this.findPw = false;
+    setLoginDisplay(obj) {
+      this.loginDisplay = obj.loginDisplay;
     },
   },
 };
