@@ -7,15 +7,19 @@ import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 @Entity
 @Table(name = "members")
 @Data
 @DynamicInsert
 @DynamicUpdate
-public class Members {
+public class Members implements UserDetails {
+
     // MEMBERS Entity 테이블
     @Id
     @GenericGenerator(name="uuid2", strategy = "uuid2")
@@ -50,6 +54,8 @@ public class Members {
     @Column(columnDefinition = "VARCHAR(1000)")
     private String memAddr2;
 
+    public Members() {}
+
     @Builder
     public Members(MemberDto memberDto) {
         this.memId = memberDto.getMemId();
@@ -62,4 +68,20 @@ public class Members {
         this.memAddr1 = memberDto.getMemAddr1();
         this.memAddr2 = memberDto.getMemAddr2();
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public String getPassword() {
+        return memPw;
+    }
+
+    @Override
+    public String getUsername() {
+        return memId;
+    }
+
 }

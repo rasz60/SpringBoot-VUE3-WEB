@@ -27,17 +27,32 @@ import LoginDialog from "@/components/overlay/LoginDialog.vue";
 
       <template v-slot:append>
         <div id="buttonBox">
-          <v-btn class="headerBtn" @click="$router.push('/signup')">
+          <v-btn
+            class="headerBtn"
+            @click="$router.push('/signup')"
+            v-show="!loginFlag"
+          >
             <v-icon icon="mdi-account-plus"></v-icon>
             <v-tooltip location="bottom center" activator="parent">
               Signup
             </v-tooltip>
           </v-btn>
 
-          <v-btn class="headerBtn" @click.stop="loginDisplay = !loginDisplay">
+          <v-btn
+            class="headerBtn"
+            @click.stop="loginDisplay = !loginDisplay"
+            v-show="!loginFlag"
+          >
             <v-icon icon="mdi-key"></v-icon>
             <v-tooltip location="bottom center" activator="parent">
               login
+            </v-tooltip>
+          </v-btn>
+
+          <v-btn class="headerBtn" @click.stop="fnLogout" v-show="loginFlag">
+            <v-icon icon="mdi-logout"></v-icon>
+            <v-tooltip location="bottom center" activator="parent">
+              logout
             </v-tooltip>
           </v-btn>
         </div>
@@ -52,12 +67,17 @@ export default {
   data() {
     return {
       loginDisplay: false,
+      loginFlag: false,
     };
+  },
+  created() {
+    this.loginFlag = this.$loginInfo;
   },
   methods: {
     setLoginDisplay(obj) {
       this.loginDisplay = obj.loginDisplay;
     },
+    fnLogout() {},
   },
 };
 </script>

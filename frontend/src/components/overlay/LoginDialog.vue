@@ -21,12 +21,13 @@ import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
 
     <h3 class="text-h5 mb-4">{{ cardTitle }}</h3>
 
-    <v-sheet color="surface">
+    <v-sheet color="surface" class="mb-4">
       <v-text-field
         variant="underlined"
         label="ID"
         v-show="!findId"
         v-model="login.memId"
+        :rules="loginChk"
       ></v-text-field>
       <v-text-field
         variant="underlined"
@@ -34,6 +35,7 @@ import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
         type="password"
         v-show="!findId"
         v-model="login.memPw"
+        :rules="loginChk"
       ></v-text-field>
       <v-text-field
         variant="underlined"
@@ -73,6 +75,7 @@ import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
       text="Login"
       variant="flat"
       width="70%"
+      @click="fnLogin"
     ></v-btn>
   </v-card>
 </template>
@@ -96,12 +99,48 @@ export default {
       overlay: false,
     };
   },
+  computed: {
+    loginChk() {
+      const rules = [];
+
+      const nullChk = (v) => {
+        if (v) return true;
+        return "필수 입력사항입니다.";
+      };
+
+      rules.push(nullChk);
+      return rules;
+    },
+  },
   methods: {
     fnLoginDisplayReset() {
       this.$emit("sendMessage", { loginDisplay: false });
     },
-    fnSend() {
-      console.log("send");
+    async fnLogin() {
+      if (
+        this.loginChk[0](this.login.memId) == true &&
+        this.loginChk[0](this.login.memPw) == true
+      ) {
+        let data = {
+          memId: this.login.memId,
+          memPw: this.login.memPw,
+        };
+
+        await this.axios
+          .post("/rest/login", data)
+          .then((res) => {
+            if (res.data) {
+              localStorage.setItem("login", res.data);
+              this.$router.go(0);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } else {
+        alert("필수 입력사항을 입력해주세요.");
+        return false;
+      }
     },
   },
   watch: {
@@ -120,10 +159,6 @@ export default {
       } else {
         if (!this.findId) this.cardTitle = "Login";
       }
-    },
-    fnChildMessage(obj) {
-      this.overlay = obj.overlay;
-      this.find.flag = obj.chkd;
     },
   },
 };

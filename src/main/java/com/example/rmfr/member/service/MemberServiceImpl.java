@@ -8,16 +8,23 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Base64Util;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MemberServiceImpl implements MemberService {
+public class MemberServiceImpl implements MemberService, UserDetailsService {
 
     private final MemberRepository memberRepository;
     private final MailUtils mailUtils;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public Long idDupChk(String memId) {
@@ -47,6 +54,7 @@ public class MemberServiceImpl implements MemberService {
     public String signup(MemberDto memberDto) {
         String rst = "";
         try {
+            memberDto.setMemPw(bCryptPasswordEncoder.encode(memberDto.getMemPw()));
             rst = memberRepository.save(Members.builder().memberDto(memberDto).build()).getMemId();
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,4 +76,14 @@ public class MemberServiceImpl implements MemberService {
 
         return code;
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Members member = memberRepository.findByMemId(username)
+                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+
+        return member;
+    }
+
+
 }
