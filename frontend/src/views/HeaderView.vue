@@ -71,13 +71,25 @@ export default {
     };
   },
   created() {
-    this.loginFlag = this.$loginInfo;
+    this.loginFlag = this.$loginInfo.login;
   },
   methods: {
     setLoginDisplay(obj) {
       this.loginDisplay = obj.loginDisplay;
     },
-    fnLogout() {},
+    fnLogout() {
+      this.axios.get("/logout").then((res) => {
+        if (res.status == 200) {
+          this.$loginInfo.login = false;
+          this.$loginInfo.credentials = null;
+          this.$loginInfo.expired = null;
+
+          this.$route.fullPath == "/"
+            ? this.$router.go(0)
+            : this.$router.push("/");
+        }
+      });
+    },
   },
 };
 </script>

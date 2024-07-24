@@ -32,3 +32,8 @@ spring:
             enable: true
           auth: true
           timeout: 5000
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

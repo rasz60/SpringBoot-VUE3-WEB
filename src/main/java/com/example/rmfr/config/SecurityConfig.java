@@ -2,20 +2,22 @@ package com.example.rmfr.config;
 
 import com.example.rmfr.config.custom.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.DelegatingSecurityContextRepository;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
+
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 @Configuration
 @RequiredArgsConstructor
@@ -37,19 +39,18 @@ public class SecurityConfig {
                 .headers((headerConfig) ->
                         headerConfig.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
                 )
-                .authorizeHttpRequests((authorizeRequests) ->
-                        authorizeRequests
-                                .requestMatchers("/", "/rest/**", "/signup/**").permitAll()
-                                .anyRequest().authenticated()
-                )
-                .addFilterBefore(ajaxAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests((authorizeRequests) ->authorizeRequests.anyRequest().permitAll()) // 모든 요청 접근 가능
                 .exceptionHandling(config -> config
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
                 )
                 .logout((logoutConfig) ->
-                        logoutConfig.logoutSuccessUrl("/")
-                );
+                        logoutConfig
+                                .logoutUrl("/logout")
+                                .logoutSuccessUrl("/")
+                )
+                .addFilterBefore(ajaxAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class) // ajax 요청일 때 filter 추가
+        ;
 
         return http.build();
     }

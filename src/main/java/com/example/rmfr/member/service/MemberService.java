@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface MemberService {
-
     public Long idDupChk(String memId);
     public Map<String, Object> sendVerifyCode(String memEmail);
     public String signup(MemberDto memberDto);

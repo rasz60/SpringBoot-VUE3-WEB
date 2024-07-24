@@ -26,7 +26,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
+        response.setCharacterEncoding("UTF-8");
         if(exception instanceof BadCredentialsException) {
             errMsg = "아이디나 비밀번호를 다시 확인해주세요.";
         } else if(exception instanceof DisabledException) {

@@ -54,6 +54,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     public String signup(MemberDto memberDto) {
         String rst = "";
         try {
+            // spring security 비밀번호 암호화 적용
             memberDto.setMemPw(bCryptPasswordEncoder.encode(memberDto.getMemPw()));
             rst = memberRepository.save(Members.builder().memberDto(memberDto).build()).getMemId();
         } catch (Exception e) {

@@ -129,13 +129,25 @@ export default {
         await this.axios
           .post("/rest/login", data)
           .then((res) => {
-            if (res.data) {
-              localStorage.setItem("login", res.data);
-              this.$router.go(0);
+            if (res.status == 200) {
+              this.fnLoginDisplayReset();
+
+              this.$loginInfo.login = true;
+              this.$loginInfo.credentials = res.data;
+              this.$loginInfo.expired =
+                new Date().getTime() + 24 * 60 * 60 * 1000;
+
+              if (this.$route.fullPath == "/") this.$router.go(0);
+              else this.$router.push("/");
             }
           })
           .catch((err) => {
-            console.log(err);
+            if (err.code == "ERR_BAD_REQUEST") {
+              alert(err.response.data);
+            } else {
+              alert("시스템 오류로 인해 로그인에 실패했습니다.");
+              console.log(err);
+            }
           });
       } else {
         alert("필수 입력사항을 입력해주세요.");

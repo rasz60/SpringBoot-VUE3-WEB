@@ -23,19 +23,25 @@ axios.defaults.headers.delete["Content-Type"] = "application/json";
 app.config.globalProperties.axios = axios;
 /* Axios End */
 
-// 반응형 전역변수 선언
+/* loginInfo 반응형 전역변수 선언 Start */
 import { reactive, watchEffect } from "vue";
 
-// 로그인 정보 전역 변수
-const initLogin = JSON.parse(localStorage.getItem("login"));
-const loginInfo = reactive(initLogin);
+// localStorage에 loginInfo가 있으면 loginInfo를, 아니면 초기 값 설정
+const initLogin = { login: false, credentials: null, expired: null };
 
-// loginInfo 변경 시, 값 유지
+// localStorage에 저장된 loginInfo get
+const tmp = JSON.parse(localStorage.getItem("rmfrLoginInfo"))
+  ? JSON.parse(localStorage.getItem("rmfrLoginInfo"))
+  : initLogin;
+
+const loginInfo = reactive(tmp);
 watchEffect(() => {
-  localStorage.setItem("login", JSON.stringify(loginInfo));
+  localStorage.setItem("rmfrLoginInfo", JSON.stringify(loginInfo));
 });
 
+// 전역 변수 선언
 app.config.globalProperties.$loginInfo = loginInfo;
+/* loginInfo 반응형 전역변수 선언 End */
 
 /* vuetify Start */
 import vuetify from "./plugins/vuetify";
