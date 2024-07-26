@@ -130,23 +130,29 @@ export default {
           .post("/rest/login", data)
           .then((res) => {
             if (res.status == 200) {
+              // 로그인 창 닫기
               this.fnLoginDisplayReset();
 
+              // 로그인 정보 localStorage 입력
               this.$loginInfo.login = true;
               this.$loginInfo.credentials = res.data;
               this.$loginInfo.expired =
                 new Date().getTime() + 24 * 60 * 60 * 1000;
 
-              if (this.$route.fullPath == "/") this.$router.go(0);
-              else this.$router.push("/");
+              if (this.$route.fullPath == "/") {
+                this.$router.go(0); // referer화면이 root URL일 때는 새로고침
+              } else {
+                this.$router.push("/"); // root URL로 화면 전환
+              }
             }
           })
           .catch((err) => {
             if (err.code == "ERR_BAD_REQUEST") {
+              // 로그인 실패 메시지 (아이디, 비밀번호 확인)
               alert(err.response.data);
             } else {
+              // 통신 오류
               alert("시스템 오류로 인해 로그인에 실패했습니다.");
-              console.log(err);
             }
           });
       } else {

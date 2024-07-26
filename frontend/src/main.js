@@ -27,14 +27,20 @@ app.config.globalProperties.axios = axios;
 import { reactive, watchEffect } from "vue";
 
 // localStorage에 loginInfo가 있으면 loginInfo를, 아니면 초기 값 설정
-const initLogin = { login: false, credentials: null, expired: null };
+var initLogin = { login: false, credentials: null, expired: null };
 
 // localStorage에 저장된 loginInfo get
-const tmp = JSON.parse(localStorage.getItem("rmfrLoginInfo"))
-  ? JSON.parse(localStorage.getItem("rmfrLoginInfo"))
-  : initLogin;
+var storedInfo = JSON.parse(localStorage.getItem("rmfrLoginInfo"));
+var info = null;
 
-const loginInfo = reactive(tmp);
+if (storedInfo != null) {
+  info = storedInfo.expired < new Date().getTime() ? initLogin : storedInfo;
+} else {
+  info = initLogin;
+}
+
+const loginInfo = reactive(info);
+
 watchEffect(() => {
   localStorage.setItem("rmfrLoginInfo", JSON.stringify(loginInfo));
 });

@@ -23,31 +23,35 @@ const router = createRouter({
   routes,
 });
 
+// 라우터 변경 시마다 화면을 뿌리기 전에 실행
 router.beforeEach(() => {
+  // local storage에 로그인 정보 가져오기
   var loginInfo = JSON.parse(localStorage.getItem("rmfrLoginInfo"));
-  if (loginInfo != null && loginInfo.login) {
+
+  // 로그인 상태인 경우 진입
+  if (loginInfo.login) {
     var today = new Date();
 
+    // 만료일자가 현재 시간보다 크면 갱신
     if (loginInfo.expired > today.getTime()) {
+      // 만료일자 현재 시간 +1 day
       loginInfo.expired = new Date().getTime() + 24 * 60 * 60 * 1000;
-    } else {
+    }
+    // 만료되었을 때
+    else {
+      // 로그인 정보 초기화
       loginInfo.login = false;
       loginInfo.credentials = null;
       loginInfo.expired = null;
+
+      // 강제 로그아웃 안내 문구
       alert("로그인이 만료되었습니다. 다시 로그인 해주세요.");
       location.href = "/logout";
     }
+
+    // 변경된 정보 local storage 저장
     localStorage.setItem("rmfrLoginInfo", JSON.stringify(loginInfo));
   }
 });
-/*
-const isAuthenticationMember = (to, from, next) => {
-  if (localStorage.getItem("login") == "true") {
-    next();
-  } else {
-    alert("로그인이 필요합니다.");
-    next(from);
-  }
-};
-*/
+
 export default router;

@@ -11,6 +11,10 @@ module.exports = defineConfig({
         target: "http://localhost:8082",
         changeOrigin: true,
       },
+      "/logout": {
+        target: "http://localhost:8082",
+        changeOrigin: true,
+      },
     },
   },
 });

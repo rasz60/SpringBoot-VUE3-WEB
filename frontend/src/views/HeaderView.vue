@@ -78,17 +78,8 @@ export default {
       this.loginDisplay = obj.loginDisplay;
     },
     fnLogout() {
-      this.axios.get("/logout").then((res) => {
-        if (res.status == 200) {
-          this.$loginInfo.login = false;
-          this.$loginInfo.credentials = null;
-          this.$loginInfo.expired = null;
-
-          this.$route.fullPath == "/"
-            ? this.$router.go(0)
-            : this.$router.push("/");
-        }
-      });
+      this.$loginInfo.expired = -1;
+      location.href = "/logout";
     },
   },
 };
