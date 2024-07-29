@@ -41,7 +41,7 @@ router.beforeEach(() => {
     else {
       // 로그인 정보 초기화
       loginInfo.login = false;
-      loginInfo.credentials = null;
+      loginInfo.token = null;
       loginInfo.expired = null;
 
       // 강제 로그아웃 안내 문구

@@ -15,5 +15,4 @@ public class CustomAuthenticationDeniedHandler implements AccessDeniedHandler {
                        AccessDeniedException accessDeniedException) throws IOException {
         response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access is denied");
     }
-
 }

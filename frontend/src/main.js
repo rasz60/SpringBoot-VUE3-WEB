@@ -27,7 +27,7 @@ app.config.globalProperties.axios = axios;
 import { reactive, watchEffect } from "vue";
 
 // localStorage에 loginInfo가 있으면 loginInfo를, 아니면 초기 값 설정
-var initLogin = { login: false, credentials: null, expired: null };
+var initLogin = { login: false, token: null, expired: null };
 
 // localStorage에 저장된 loginInfo get
 var storedInfo = JSON.parse(localStorage.getItem("rmfrLoginInfo"));

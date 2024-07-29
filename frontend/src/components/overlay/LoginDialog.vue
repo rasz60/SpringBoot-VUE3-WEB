@@ -135,7 +135,7 @@ export default {
 
               // 로그인 정보 localStorage 입력
               this.$loginInfo.login = true;
-              this.$loginInfo.credentials = res.data;
+              this.$loginInfo.token = res.data;
               this.$loginInfo.expired =
                 new Date().getTime() + 24 * 60 * 60 * 1000;
 

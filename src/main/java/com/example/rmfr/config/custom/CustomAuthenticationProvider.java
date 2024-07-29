@@ -29,7 +29,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException("Invalid Password");
         }
 
-        return new CustomAuthenticationToken(entity, null, entity.getAuthorities());
+        return new CustomAuthenticationToken(entity, entity.getPassword(), entity.getAuthorities());
     }
 
     @Override
