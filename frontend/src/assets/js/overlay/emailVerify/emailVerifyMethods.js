@@ -57,7 +57,6 @@ export default {
   /* valid code start */
   fnValidCode() {
     var otp = window.btoa(this.otp);
-    console.log(otp, this.verifyCode);
     if (this.verifyCode == otp) {
       alert("이메일 인증이 완료되었습니다.");
       this.fnDelTimer();

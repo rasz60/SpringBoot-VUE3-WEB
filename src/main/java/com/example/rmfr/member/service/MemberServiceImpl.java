@@ -14,8 +14,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -86,5 +87,57 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         return member;
     }
 
+    @Override
+    public int countByMemEmail(String memEmail) {
+        int cnt = 0;
+        try {
+            cnt = memberRepository.countByMemEmail(memEmail).intValue();
+            if ( cnt <= 0 ) throw new Exception("MEM_EMAIL NOT FOUND.");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return cnt;
+    }
 
+    @Override
+    public List<Members> findByMemEmail(String memEmail) {
+        List<Members> members = null;
+        try {
+            members = memberRepository.findByMemEmail(memEmail);
+            if ( members.isEmpty() ) throw new Exception("MEM_EMAIL NOT FOUND.");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return members;
+    }
+
+    @Override
+    public Map<String, Object> sendIdList(String memEmail) {
+        Map<String, Object> rst = null;
+        try {
+            List<Members> members = this.findByMemEmail(memEmail);
+            List<String> ids = idBlind(members);
+            rst = mailUtils.sendIdToEmail(memEmail, ids);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return rst;
+    }
+
+    public List<String> idBlind(List<Members> members) {
+        List<String> ids = new ArrayList<>();
+        for ( Members member : members ) {
+            String memId = member.getMemId();
+
+            String blind = memId.substring(0, 4);
+            int times = memId.length() - 4;
+            for (int i = 0; i < times; i++ ) {
+                blind += "*";
+            }
+
+            ids.add(blind);
+        }
+
+        return ids;
+    }
 }

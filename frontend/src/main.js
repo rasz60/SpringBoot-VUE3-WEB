@@ -26,26 +26,22 @@ app.config.globalProperties.axios = axios;
 /* loginInfo 반응형 전역변수 선언 Start */
 import { reactive, watchEffect } from "vue";
 
-// localStorage에 loginInfo가 있으면 loginInfo를, 아니면 초기 값 설정
+// 로그인 정보 초기 값
 var initLogin = { login: false, token: null, expired: null };
 
 // localStorage에 저장된 loginInfo get
 var storedInfo = JSON.parse(localStorage.getItem("rmfrLoginInfo"));
-var info = null;
 
-if (storedInfo != null) {
-  info = storedInfo.expired < new Date().getTime() ? initLogin : storedInfo;
-} else {
-  info = initLogin;
-}
-
+// localStorage에 loginInfo가 있으면 loginInfo를, 아니면 초기 값 설정
+var info = storedInfo == null ? initLogin : storedInfo;
 const loginInfo = reactive(info);
 
+// loginInfo 변경 시 localStorage 변수 갱신
 watchEffect(() => {
   localStorage.setItem("rmfrLoginInfo", JSON.stringify(loginInfo));
 });
 
-// 전역 변수 선언
+// loginInfo 전역 변수 선언
 app.config.globalProperties.$loginInfo = loginInfo;
 /* loginInfo 반응형 전역변수 선언 End */
 

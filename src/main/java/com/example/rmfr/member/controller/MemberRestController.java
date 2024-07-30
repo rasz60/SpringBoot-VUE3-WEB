@@ -1,12 +1,14 @@
 package com.example.rmfr.member.controller;
 
 import com.example.rmfr.member.dto.MemberDto;
+import com.example.rmfr.member.entity.Members;
 import com.example.rmfr.member.service.MemberService;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,4 +32,18 @@ public class MemberRestController {
         return memberService.signup(memberDto);
     }
 
+    @GetMapping("/rest/findId/{memEmail}")
+    @ResponseBody
+    public int findId(@PathVariable("memEmail") String memEmail) {
+        return memberService.countByMemEmail(memEmail);
+    }
+    @GetMapping("/rest/sendIdList/{memEmail}")
+    public Map<String, Object> sendIdList(@PathVariable("memEmail") String memEmail) {
+        return memberService.sendIdList(memEmail);
+    }
+
+    @GetMapping("/rest/sendTempPw/{memEmail}")
+    public Map<String, Object> sendTempPw(@PathVariable("memEmail") String memEmail) {
+        return memberService.sendTempPw(memEmail);
+    }
 }

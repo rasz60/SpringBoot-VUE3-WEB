@@ -78,8 +78,11 @@ export default {
       this.loginDisplay = obj.loginDisplay;
     },
     fnLogout() {
-      this.$loginInfo.expired = -1;
-      location.href = "/logout";
+      // 로컬 스토리지 loginInfo 초기화
+      this.$loginInfo.login = false;
+      this.$loginInfo.token = null;
+      this.$loginInfo.expired = null;
+      location.href = "/logout"; // spring security logout URL로 이동
     },
   },
 };

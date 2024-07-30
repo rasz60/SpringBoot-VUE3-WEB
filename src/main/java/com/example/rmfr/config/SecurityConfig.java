@@ -20,11 +20,6 @@ import org.springframework.security.web.context.RequestAttributeSecurityContextR
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     private final CustomAuthenticationEntrypoint authenticationEntryPoint;
