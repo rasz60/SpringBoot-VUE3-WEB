@@ -1,13 +1,7 @@
 export default {
-  login: {
-    memId: "",
-    memPw: "",
-  },
-  find: {
-    memId: "",
-    memEmail: "",
-    verifyFlag: false,
-  },
+  memId: "",
+  memPw: "",
+  memEmail: "",
   cardTitle: "Login",
   dpLogin: true,
   findId: false,

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -42,8 +43,28 @@ public class MemberRestController {
         return memberService.sendIdList(memEmail);
     }
 
-    @GetMapping("/rest/sendTempPw/{memEmail}")
-    public Map<String, Object> sendTempPw(@PathVariable("memEmail") String memEmail) {
-        return memberService.sendTempPw(memEmail);
+    @GetMapping("/rest/sendTempPw/{memId}/{memEmail}")
+    public Map<String, Object> sendTempPw(@PathVariable("memId") String memId, @PathVariable("memEmail") String memEmail) {
+        return memberService.sendTempPw(memId, memEmail);
+    }
+
+    @GetMapping("/rest/loginUserInfo")
+    public MemberDto loginUserInfo(Principal principal) {
+        MemberDto member = null;
+        if (principal != null) {
+            member = memberService.getUserInfo(principal.getName());
+        }
+        return member;
+    }
+
+    @PostMapping("/rest/currPwChkd")
+    @ResponseBody
+    public boolean currPwChkd(Principal principal, @RequestBody Map<String, String> body) {
+        boolean rst = false;
+        String memPw = body.get("memPw");
+        if (principal != null && !"".equals(memPw)) {
+          rst = memberService.currPwChkd(principal.getName(), memPw);
+        }
+        return rst;
     }
 }

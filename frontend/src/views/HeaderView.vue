@@ -40,6 +40,17 @@ import LoginDialog from "@/components/overlay/LoginDialog.vue";
 
           <v-btn
             class="headerBtn"
+            @click="$router.push('/settings')"
+            v-show="loginFlag"
+          >
+            <v-icon icon="mdi-account-cog"></v-icon>
+            <v-tooltip location="bottom center" activator="parent">
+              Settings
+            </v-tooltip>
+          </v-btn>
+
+          <v-btn
+            class="headerBtn"
             @click.stop="loginDisplay = !loginDisplay"
             v-show="!loginFlag"
           >

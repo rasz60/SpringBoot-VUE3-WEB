@@ -5,14 +5,19 @@ export default {
     this.findPw = false;
     this.dpLogin = true;
   },
+  initValue() {
+    this.memId = "";
+    this.memEmail = "";
+    this.memPw = "";
+  },
   async fnLogin() {
     if (
-      this.loginChk[0](this.login.memId) == true &&
-      this.loginChk[0](this.login.memPw) == true
+      this.loginChk[0](this.memId) == true &&
+      this.loginChk[0](this.memPw) == true
     ) {
       let data = {
-        memId: this.login.memId,
-        memPw: this.login.memPw,
+        memId: this.memId,
+        memPw: this.memPw,
       };
 
       await this.axios
@@ -50,43 +55,79 @@ export default {
     }
   },
   async fnValid() {
-    await this.axios
-      .get("/rest/findId/" + this.login.memEmail)
-      .then((res) => {
-        var cnt = res.data;
+    var memEmail = this.memEmail;
 
-        if (cnt > 0) {
-          this.find.memEmail = this.login.memEmail;
-          this.overlay = true;
-        } else {
-          alert("가입되지 않은 이메일 주소입니다.");
-          return false;
-        }
-      })
-      .catch((err) => console.log(err));
+    if (memEmail) {
+      await this.axios
+        .get("/rest/findId/" + this.memEmail)
+        .then((res) => {
+          var cnt = res.data;
+
+          if (cnt > 0) {
+            this.overlay = true;
+          } else {
+            alert("가입되지 않은 이메일 주소입니다.");
+            return false;
+          }
+        })
+        .catch((err) => {
+          alert(
+            "시스템 오류가 발생하였습니다. 지속될 시 관리자에게 문의해주세요."
+          );
+          console.log(err);
+        });
+    } else {
+      alert("이메일 주소를 입력해주세요.");
+    }
   },
   async fnChildMessage(v) {
     this.overlay = v.overlay;
-    this.verifyFlag = v.chkd;
 
-    if (this.verifyFlag) {
+    if (v.chkd) {
       alert(
         "인증하신 메일로 rmfr에 가입된 아이디를 보내드렸습니다.\n메일에서 자세한 내용을 확인해주세요."
       );
 
       await this.axios
-        .get("/rest/sendIdList/" + this.find.memEmail)
-        .then((res) => {
-          console.log(res);
-          this.find.memEmail = "";
-          this.login.memEmail = "";
+        .get("/rest/sendIdList/" + this.memEmail)
+        .then(() => {
+          this.memEmail = "";
         })
         .catch((err) => {
+          alert(
+            "시스템 오류가 발생하였습니다. 지속될 시 관리자에게 문의해주세요."
+          );
           console.log(err);
         });
 
       this.findId = false;
-      return false;
+    }
+  },
+  async fnTempPw() {
+    var memId = this.memId;
+    var memEmail = this.memEmail;
+
+    if (memId && memEmail) {
+      await this.axios
+        .get("/rest/sendTempPw/" + memId + "/" + memEmail)
+        .then((res) => {
+          var rst = res.data;
+          if (rst.resultCode == 200) {
+            alert("이메일로 임시 비밀번호를 발송하였습니다.");
+            this.findPw = false;
+            this.dpLogin = true;
+          } else {
+            alert("아이디와 이메일 주소가 일치하는 회원을 찾지 못했습니다.");
+          }
+        })
+        .catch((err) => {
+          alert(
+            "시스템 오류가 발생하였습니다. 지속될 시 관리자에게 문의해주세요."
+          );
+          console.log(err);
+        });
+    } else {
+      alert("아이디와 이메일을 모두 입력해주세요.");
     }
   },
 };

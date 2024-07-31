@@ -4,6 +4,7 @@ import com.example.rmfr.member.dto.MemberDto;
 import com.example.rmfr.member.entity.Members;
 import com.example.rmfr.member.repository.MemberRepository;
 import com.example.rmfr.utils.MailUtils;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -100,26 +99,79 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     }
 
     @Override
-    public List<Members> findByMemEmail(String memEmail) {
-        List<Members> members = null;
-        try {
-            members = memberRepository.findByMemEmail(memEmail);
-            if ( members.isEmpty() ) throw new Exception("MEM_EMAIL NOT FOUND.");
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return members;
-    }
-
-    @Override
     public Map<String, Object> sendIdList(String memEmail) {
         Map<String, Object> rst = null;
         try {
-            List<Members> members = this.findByMemEmail(memEmail);
+            List<Members> members = memberRepository.findByMemEmail(memEmail);
+
+            if ( members.isEmpty() )
+                throw new Exception("MEM_EMAIL NOT FOUND.");
+
             List<String> ids = idBlind(members);
             rst = mailUtils.sendIdToEmail(memEmail, ids);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
+        }
+        return rst;
+    }
+
+    @Override
+    public Map<String, Object> sendTempPw(String memId, String memEmail) {
+        Map<String, Object> rst = new HashMap<>();
+        try {
+            Optional<Members> mem = memberRepository.findByMemId(memId);
+
+            if ( mem.isPresent() ) {
+                Members member = mem.get();
+
+                if ( memEmail.equals(member.getMemEmail()) ) {
+                    String pw = tempPwGenerate();
+                    member.setMemPw(bCryptPasswordEncoder.encode(pw));
+                    memberRepository.save(member);
+                    rst = mailUtils.sendPwToEmail(member.getMemEmail(), pw);
+                } else {
+                    rst.put("resultCode", 400);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return rst;
+    }
+
+    @Override
+    public MemberDto getUserInfo(String memId) {
+        MemberDto member = new MemberDto();
+        try {
+            Optional<Members> mem = memberRepository.findByMemId(memId);
+
+            if ( mem.isPresent() ) {
+                member.of(mem.get());
+            } else {
+                throw new Exception("MEM_ID NOT FOUND.");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        return member;
+    }
+
+    @Override
+    public boolean currPwChkd(String memId, String memPw) {
+        boolean rst = false;
+        try {
+            Optional<Members> mem = memberRepository.findByMemId(memId);
+
+            if ( mem.isPresent() ) {
+                System.out.println(memPw);
+                System.out.println(mem.get().getMemPw());
+                rst = bCryptPasswordEncoder.matches(memPw, mem.get().getMemPw());
+            } else {
+                throw new Exception("MEM_ID NOT FOUND.");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
         return rst;
     }
@@ -134,10 +186,32 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
             for (int i = 0; i < times; i++ ) {
                 blind += "*";
             }
-
             ids.add(blind);
         }
 
         return ids;
+    }
+
+    public String tempPwGenerate() {
+        String pw = "";
+        String[] regStr = {"`", "~", "!", "@", "$", "%", "*", "#", "^", "?", "&", "(", ")", "-", "_", "=", "+"};
+
+        for ( int i = 0; i < 15; i++ ) {
+            int random = (int)Math.ceil(Math.random() * 10);
+
+            if (random < 3) { // 1, 2
+                pw += (int)(Math.random() * 10) + "";
+            } else if (random < 6) { // 3, 4, 5
+                char key = (char) ((Math.random() * 26) + 65);
+                pw += key + "";
+            } else if (random < 9) { // 6, 7, 8
+                char key = (char) ((Math.random() * 26) + 97);
+                pw += key + "";
+            } else { // 9, 10
+                int idx = (int)(Math.random() * regStr.length);
+                pw += regStr[idx];
+            }
+        }
+        return pw;
     }
 }

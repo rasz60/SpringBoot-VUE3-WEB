@@ -13,7 +13,8 @@ public interface MemberService {
     public Map<String, Object> sendVerifyCode(String memEmail);
     public String signup(MemberDto memberDto);
     public int countByMemEmail(String memEmail);
-    public List<Members> findByMemEmail(String memEmail);
     public Map<String, Object> sendIdList(String memEmail);
-    public Map<String, Object> sendTempPw(String memEmail);
+    public Map<String, Object> sendTempPw(String memId, String memEmail);
+    public MemberDto getUserInfo(String memId);
+    public boolean currPwChkd(String memId, String memPw);
 }

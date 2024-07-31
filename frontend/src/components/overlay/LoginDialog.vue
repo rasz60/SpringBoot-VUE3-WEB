@@ -6,7 +6,7 @@ import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
     <VerifyDialog
       ref="verifyDialog"
       @sendMessage="fnChildMessage"
-      :memEmail="find.memEmail"
+      :memEmail="memEmail"
     />
   </v-overlay>
   <v-card
@@ -26,7 +26,7 @@ import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
         variant="underlined"
         label="ID"
         v-show="!findId || dpLogin"
-        v-model="login.memId"
+        v-model="memId"
         :rules="loginChk"
       ></v-text-field>
       <v-text-field
@@ -34,7 +34,7 @@ import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
         label="Password"
         type="password"
         v-show="(!findId && !findPw) || dpLogin"
-        v-model="login.memPw"
+        v-model="memPw"
         :rules="loginChk"
       ></v-text-field>
       <v-text-field
@@ -42,9 +42,9 @@ import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
         label="Email"
         type="email"
         v-show="findId || findPw"
-        v-model="login.memEmail"
-        :append-icon="flag ? `mdi-email` : `mdi-email-outline`"
-        @click:append="fnValid"
+        v-model="memEmail"
+        :append-icon="findPw ? `mdi-check` : `mdi-email-outline`"
+        @click:append="findPw ? fnTempPw() : fnValid()"
       ></v-text-field>
     </v-sheet>
 
@@ -76,6 +76,7 @@ import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
       text="Login"
       variant="flat"
       width="70%"
+      v-if="dpLogin"
       @click="fnLogin"
     ></v-btn>
   </v-card>
@@ -105,6 +106,7 @@ export default {
   methods: loginMethods,
   watch: {
     findId(v) {
+      this.initValue();
       if (v) {
         this.findPw = false;
         this.dpLogin = false;
@@ -114,6 +116,7 @@ export default {
       }
     },
     findPw(v) {
+      this.initValue();
       if (v) {
         this.findId = false;
         this.dpLogin = false;
