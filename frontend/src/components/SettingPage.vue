@@ -58,6 +58,7 @@ import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
           v-model="memEmail"
           :rules="emailRules"
           :readonly="chk.emailChkd"
+          @click="fnResetEmail"
         ></v-text-field>
       </v-col>
       <v-col cols="1" class="btnCols">
@@ -125,7 +126,8 @@ import VerifyDialog from "@/components/overlay/EmailVerifyDialog.vue";
 
 <script>
 import settingsData from "@/assets/js/settings/settingsData";
-import signupRules from "@/assets/js/signup/signupRules";
+import settingsRules from "@/assets/js/settings/settingsRules";
+import settingsMethods from "@/assets/js/settings/settingsMethods";
 
 export default {
   name: "SignupPage",
@@ -138,67 +140,9 @@ export default {
   mounted() {
     this.fnLoadDaumPostcodeScript();
   },
-  computed: signupRules,
-  methods: {
-    async init() {
-      if (this.$loginInfo.login) {
-        await this.axios
-          .get("/rest/loginUserInfo")
-          .then((res) => {
-            this.memId = res.data.memId;
-            this.memEmail = res.data.memEmail;
-            this.memPhone = res.data.memPhone;
-            this.zipcode = res.data.zipcode;
-            this.memAddr1 = res.data.memAddr1;
-            this.memAddr2 = res.data.memAddr2;
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else {
-        alert("다시 로그인해주세요.");
-        location.href = "/logout";
-      }
-    },
-    async fnCurrPwChkd() {
-      if (this.currPw) {
-        var data = {
-          memPw: this.currPw,
-        };
-        await this.axios
-          .post("/rest/currPwChkd", JSON.stringify(data), {
-            headers: { "Content-Type": "application/json" },
-          })
-          .then((res) => {
-            var chk = res.data;
-
-            if (chk) {
-              this.currPw = "";
-              this.beforeChkd = true;
-            } else {
-              alert("비밀번호를 다시 확인해주세요.");
-            }
-          })
-          .catch((err) => {
-            alert(
-              "시스템 오류가 발생하였습니다. 지속될 경우 관리자에게 문의해주세요."
-            );
-            console.log(err);
-          });
-      } else {
-        alert("비밀번호를 입력해주세요.");
-      }
-    },
-    fnExecDaumPostcode() {},
-    fnLoadDaumPostcodeScript() {},
-    fnMailVerify() {},
-    fnValidate() {},
-    fnDeleteUser() {},
-  },
+  computed: settingsRules,
+  methods: settingsMethods,
   watch: {
-    memId() {
-      this.idDupChk = false;
-    },
     memPw(v) {
       this.chk.pwChkd = v == this.pwChk;
     },

@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Members, Long> {
-    Long countByMemId(String memId);
-    public Optional<Members> findByMemId(String username);
-    public Long countByMemEmail(String memEmail);
-    public List<Members> findByMemEmail(String memEmail);
+    Long countByMemIdAndMemDelYn(String memId, String memYN);
+    public Optional<Members> findByMemIdAndMemDelYn(String username, String memYN);
+    public Long countByMemEmailAndMemDelYn(String memEmail, String memDelYn);
+    public List<Members> findByMemEmailAndMemDelYn(String memEmail, String memDelYn);
 }

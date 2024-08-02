@@ -4,7 +4,6 @@ import com.example.rmfr.member.dto.MemberDto;
 import com.example.rmfr.member.entity.Members;
 import com.example.rmfr.member.repository.MemberRepository;
 import com.example.rmfr.utils.MailUtils;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -28,7 +28,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
     @Override
     public Long idDupChk(String memId) {
-        return memberRepository.countByMemId(memId);
+        return memberRepository.countByMemIdAndMemDelYn(memId, "N");
     }
 
     @Override
@@ -56,7 +56,9 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         try {
             // spring security 비밀번호 암호화 적용
             memberDto.setMemPw(bCryptPasswordEncoder.encode(memberDto.getMemPw()));
-            rst = memberRepository.save(Members.builder().memberDto(memberDto).build()).getMemId();
+            Members member = Members.builder().memberDto(memberDto).build();
+            member.setMemRegDate(LocalDateTime.now());
+            rst = memberRepository.save(member).getMemId();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -80,7 +82,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Members member = memberRepository.findByMemId(username)
+        Members member = memberRepository.findByMemIdAndMemDelYn(username, "N")
                 .orElseThrow(() -> new UsernameNotFoundException("username not found"));
 
         return member;
@@ -90,7 +92,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     public int countByMemEmail(String memEmail) {
         int cnt = 0;
         try {
-            cnt = memberRepository.countByMemEmail(memEmail).intValue();
+            cnt = memberRepository.countByMemEmailAndMemDelYn(memEmail, "N").intValue();
             if ( cnt <= 0 ) throw new Exception("MEM_EMAIL NOT FOUND.");
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -102,7 +104,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     public Map<String, Object> sendIdList(String memEmail) {
         Map<String, Object> rst = null;
         try {
-            List<Members> members = memberRepository.findByMemEmail(memEmail);
+            List<Members> members = memberRepository.findByMemEmailAndMemDelYn(memEmail, "N");
 
             if ( members.isEmpty() )
                 throw new Exception("MEM_EMAIL NOT FOUND.");
@@ -119,7 +121,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     public Map<String, Object> sendTempPw(String memId, String memEmail) {
         Map<String, Object> rst = new HashMap<>();
         try {
-            Optional<Members> mem = memberRepository.findByMemId(memId);
+            Optional<Members> mem = memberRepository.findByMemIdAndMemDelYn(memId, "N");
 
             if ( mem.isPresent() ) {
                 Members member = mem.get();
@@ -143,7 +145,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     public MemberDto getUserInfo(String memId) {
         MemberDto member = new MemberDto();
         try {
-            Optional<Members> mem = memberRepository.findByMemId(memId);
+            Optional<Members> mem = memberRepository.findByMemIdAndMemDelYn(memId, "N");
 
             if ( mem.isPresent() ) {
                 member.of(mem.get());
@@ -161,17 +163,63 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     public boolean currPwChkd(String memId, String memPw) {
         boolean rst = false;
         try {
-            Optional<Members> mem = memberRepository.findByMemId(memId);
+            Optional<Members> mem = memberRepository.findByMemIdAndMemDelYn(memId, "N");
 
             if ( mem.isPresent() ) {
-                System.out.println(memPw);
-                System.out.println(mem.get().getMemPw());
                 rst = bCryptPasswordEncoder.matches(memPw, mem.get().getMemPw());
             } else {
                 throw new Exception("MEM_ID NOT FOUND.");
             }
         } catch (Exception e) {
             log.error(e.getMessage());
+        }
+        return rst;
+    }
+
+    @Transactional
+    @Override
+    public Map<String, Object> settings(MemberDto memberDto) {
+        Map<String, Object> rst = new HashMap<>();
+        try {
+            Optional<Members> mem = memberRepository.findByMemIdAndMemDelYn(memberDto.getMemId(), "N");
+
+            if ( mem.isPresent() ) {
+
+                if ( !"".equals(memberDto.getMemPw()) )
+                    memberDto.setMemPw(bCryptPasswordEncoder.encode(memberDto.getMemPw()));
+
+                Members member = mem.get();
+                member.of(memberDto);
+                memberRepository.save(member);
+                rst.put("resultCode", "200");
+            } else {
+                rst.put("resultCode", "400");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            rst.put("resultCode", "500");
+        }
+        return rst;
+    }
+
+    @Transactional
+    @Override
+    public Map<String, Object> delete(String memId) {
+        Map<String, Object> rst = new HashMap<>();
+        try {
+            Optional<Members> mem = memberRepository.findByMemIdAndMemDelYn(memId, "N");
+            if (mem.isPresent() ) {
+                Members member = mem.get();
+                member.setMemDelYn("Y");
+                member.setMemDelDate(LocalDateTime.now());
+                memberRepository.save(member);
+               rst.put("resultCode", "200");
+            } else {
+                rst.put("resultCode", "400");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            rst.put("resultCode", "500");
         }
         return rst;
     }

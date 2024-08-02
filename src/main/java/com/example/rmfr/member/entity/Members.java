@@ -56,6 +56,15 @@ public class Members implements UserDetails {
     @Column(columnDefinition = "VARCHAR(1000)")
     private String memAddr2;
 
+    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime memRegDate;
+
+    @Column(columnDefinition = "TIMESTAMP")
+    private LocalDateTime memDelDate;
+
+    @Column(columnDefinition = "VARCHAR(1) DEFAULT 'N'")
+    private String memDelYn;
+
     public Members() {}
 
     @Builder
@@ -65,6 +74,18 @@ public class Members implements UserDetails {
         this.memEmail = memberDto.getMemEmail();
         this.memLevel = memberDto.getMemLevel();
         this.memPwUpdateDate = memberDto.getMemPwUpdateDate();
+        this.memPhone = memberDto.getMemPhone();
+        this.zipcode = memberDto.getZipcode();
+        this.memAddr1 = memberDto.getMemAddr1();
+        this.memAddr2 = memberDto.getMemAddr2();
+    }
+
+    public void of(MemberDto memberDto) {
+        if ( !"".equals(memberDto.getMemPw()) ) {
+            this.memPw = memberDto.getMemPw();
+            this.memPwUpdateDate = LocalDateTime.now();
+        }
+        this.memEmail = memberDto.getMemEmail();
         this.memPhone = memberDto.getMemPhone();
         this.zipcode = memberDto.getZipcode();
         this.memAddr1 = memberDto.getMemAddr1();

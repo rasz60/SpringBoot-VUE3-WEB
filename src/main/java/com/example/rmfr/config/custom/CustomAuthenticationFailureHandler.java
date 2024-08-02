@@ -22,7 +22,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                                         HttpServletResponse response,
                                         AuthenticationException exception) throws IOException {
 
-        String errMsg = "아이디나 비밀번호를 다시 확인해주세요.";
+        String errMsg = "가입되지 않은 아이디입니다.";
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

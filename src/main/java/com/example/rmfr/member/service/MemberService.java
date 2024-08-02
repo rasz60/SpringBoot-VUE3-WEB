@@ -1,12 +1,8 @@
 package com.example.rmfr.member.service;
 
 import com.example.rmfr.member.dto.MemberDto;
-import com.example.rmfr.member.entity.Members;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface MemberService {
     public Long idDupChk(String memId);
@@ -17,4 +13,6 @@ public interface MemberService {
     public Map<String, Object> sendTempPw(String memId, String memEmail);
     public MemberDto getUserInfo(String memId);
     public boolean currPwChkd(String memId, String memPw);
+    public Map<String, Object> settings(MemberDto memberDto);
+    public Map<String, Object> delete(String memId);
 }

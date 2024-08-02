@@ -12,9 +12,6 @@ export default {
     this.chk.pwChkd = false;
     this.chk.emailChkd = false;
     this.overlay = false;
-    this.limitTime = 179;
-    this.verifyCode = "";
-    this.otp = "";
   },
   fnRuleChk(type) {
     var rules = null;

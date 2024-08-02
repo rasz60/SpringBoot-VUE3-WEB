@@ -2,10 +2,8 @@ export default {
   idRules() {
     const rules = [];
 
-    const idNullChk = (v) => {
-      if (v) return true;
-      return "아이디는 필수 입력사항입니다.";
-    };
+    const idNullChk = (v) => this.$store.mutations.nullChk(v, "아이디");
+
     rules.push(idNullChk);
 
     const idRegChk = (v) => {

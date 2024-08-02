@@ -10,7 +10,7 @@ export default {
   memAddr2: "",
   pwChk: "",
   chk: {
-    pwChkd: true,
+    pwChkd: false,
     emailChkd: true,
   },
   overlay: false,

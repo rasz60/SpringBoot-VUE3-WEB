@@ -1,6 +1,6 @@
 <template>
   <div id="main">
-    <h2>Hello, We are RMFR❗</h2>
+    <h2>Hello, We are RMFR❗{{ $store.getters.getCount }}</h2>
   </div>
 </template>
 

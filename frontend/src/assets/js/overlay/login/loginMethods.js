@@ -1,6 +1,7 @@
 export default {
   fnLoginDisplayReset() {
     this.$emit("sendMessage", { loginDisplay: false });
+    this.initValue();
     this.findId = false;
     this.findPw = false;
     this.dpLogin = true;
@@ -101,6 +102,7 @@ export default {
         });
 
       this.findId = false;
+      this.dpLogin = true;
     }
   },
   async fnTempPw() {

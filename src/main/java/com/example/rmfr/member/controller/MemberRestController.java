@@ -1,15 +1,12 @@
 package com.example.rmfr.member.controller;
 
 import com.example.rmfr.member.dto.MemberDto;
-import com.example.rmfr.member.entity.Members;
 import com.example.rmfr.member.service.MemberService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -66,5 +63,17 @@ public class MemberRestController {
           rst = memberService.currPwChkd(principal.getName(), memPw);
         }
         return rst;
+    }
+
+    @PostMapping("/rest/member/settings")
+    @ResponseBody
+    public Map<String, Object> memberSettings(@RequestBody MemberDto memberDto) {
+        return memberService.settings(memberDto);
+    }
+
+    @GetMapping("/rest/member/delete")
+    @ResponseBody
+    public Map<String, Object> memberDelete(Principal principal) {
+        return memberService.delete(principal.getName());
     }
 }

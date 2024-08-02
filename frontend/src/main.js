@@ -10,6 +10,9 @@ import router from "./router";
 
 /* vuex Start */
 import store from "./store";
+import { useStore } from "vuex";
+//app 내에서 전역변수 선언
+app.config.globalProperties.$store = useStore();
 /* vuex End */
 
 /* Axios Start */
