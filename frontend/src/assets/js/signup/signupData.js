@@ -1,4 +1,5 @@
 export default {
+  stored: null,
   memId: "",
   memPw: "",
   memEmail: "",

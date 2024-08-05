@@ -1,4 +1,7 @@
+import { mapActions } from "vuex";
+
 export default {
+  ...mapActions("member", ["nullChk", "regChk"]),
   fnRuleChk(type) {
     var rules = null;
     var value = "";

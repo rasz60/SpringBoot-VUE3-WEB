@@ -1,17 +1,22 @@
+import { mapGetters } from "vuex";
 export default {
+  ...mapGetters("member", ["getChk"]),
   pwRules() {
     const rules = [];
-    const pwChk = (v) => {
-      if (!v) return true;
-      else {
-        var regExp =
-          /(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/;
 
-        if (regExp.test(v)) return true;
-        return "8~16자리의 영문 소/대문자, 숫자, 특수문자($,`,~,!,@,$,!,%,*,#,^,?,&,,(,),-,_,=,+) 조합으로 입력해주세요.";
-      }
+    const pwNullChk = (v) => {
+      this.nullChk(v);
+      return this.getChk;
     };
-    rules.push(pwChk);
+    rules.push(pwNullChk);
+
+    const regchk = (v) => {
+      var param = { type: "pw", value: v };
+      this.regChk(param);
+      return this.getChk;
+    };
+    rules.push(regchk);
+
     return rules;
   },
   pwChkRules() {
@@ -30,17 +35,16 @@ export default {
   emailRules() {
     const rules = [];
 
-    const nullchk = (v) => {
-      if (v) return true;
-      return "이메일은 필수 입력사항입니다.";
+    const mailNullChk = (v) => {
+      this.nullChk(v);
+      return this.getChk;
     };
-    rules.push(nullchk);
+    rules.push(mailNullChk);
 
     const regchk = (v) => {
-      var regExp =
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      if (regExp.test(v)) return true;
-      return "형식에 맞는 이메일 주소를 입력해주세요. (ex> emailId@domain.com)";
+      var param = { type: "mail", value: v };
+      this.regChk(param);
+      return this.getChk;
     };
     rules.push(regchk);
 

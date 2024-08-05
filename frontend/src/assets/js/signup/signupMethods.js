@@ -1,4 +1,7 @@
+import { mapActions } from "vuex";
+
 export default {
+  ...mapActions("member", ["nullChk", "regChk"]),
   init() {
     this.memId = "";
     this.memPw = "";
@@ -83,6 +86,7 @@ export default {
       }
     }
   },
+
   // 다음 주소 api script tag 추가
   fnLoadDaumPostcodeScript() {
     const script = document.createElement("script");
@@ -94,8 +98,6 @@ export default {
     };
     document.head.appendChild(script);
   },
-
-  // 다음 주소 검색 호출
   fnExecDaumPostcode() {
     if (window.daum && window.daum.Postcode) {
       // 팝업 호출

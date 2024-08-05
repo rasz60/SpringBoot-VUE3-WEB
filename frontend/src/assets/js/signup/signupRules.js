@@ -1,49 +1,42 @@
+import { mapGetters } from "vuex";
+
 export default {
+  ...mapGetters("member", ["getChk"]),
   idRules() {
     const rules = [];
-
-    const idNullChk = (v) => this.$store.mutations.nullChk(v, "아이디");
-
-    rules.push(idNullChk);
-
-    const idRegChk = (v) => {
-      var regExp = /^(?=.*[a-z0-9])[a-z0-9_-]{6,20}$/;
-
-      if (regExp.test(v.trim())) return true;
-      return "6~20자리의 영문소문자, 숫자, -, _ 조합으로 입력해주세요.";
+    const idNullChk = (v) => {
+      this.nullChk(v);
+      return this.getChk;
     };
-
+    rules.push(idNullChk);
+    const idRegChk = (v) => {
+      var param = { type: "id", value: v };
+      this.regChk(param);
+      return this.getChk;
+    };
     rules.push(idRegChk);
-
     return rules;
   },
   pwRules() {
     const rules = [];
-    const nullchk = (v) => {
-      if (v) return true;
-      return "비밀번호는 필수 입력사항입니다.";
-    };
-    rules.push(nullchk);
 
-    const regchk = (v) => {
-      var regExp =
-        /(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/;
-
-      if (regExp.test(v)) return true;
-      return "8~16자리의 영문 소/대문자, 숫자, 특수문자($,`,~,!,@,$,!,%,*,#,^,?,&,,(,),-,_,=,+) 조합으로 입력해주세요.";
+    const pwNullChk = (v) => {
+      this.nullChk(v);
+      return this.getChk;
     };
-    rules.push(regchk);
+    rules.push(pwNullChk);
+
+    const regChk = (v) => {
+      var param = { type: "pw", value: v };
+      this.regChk(param);
+      return this.getChk;
+    };
+    rules.push(regChk);
 
     return rules;
   },
   pwChkRules() {
     const rules = [];
-
-    const nullchk = (v) => {
-      if (v) return true;
-      else return "비빌번호를 확인해주세요.";
-    };
-    rules.push(nullchk);
 
     const pwChk = (v) => {
       if (this.memPw != "" && v == this.memPw) {
@@ -60,17 +53,16 @@ export default {
   emailRules() {
     const rules = [];
 
-    const nullchk = (v) => {
-      if (v) return true;
-      return "이메일은 필수 입력사항입니다.";
+    const mailNullChk = (v) => {
+      this.nullChk(v);
+      return this.getChk;
     };
-    rules.push(nullchk);
+    rules.push(mailNullChk);
 
     const regchk = (v) => {
-      var regExp =
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      if (regExp.test(v)) return true;
-      return "형식에 맞는 이메일 주소를 입력해주세요. (ex> emailId@domain.com)";
+      var param = { type: "mail", value: v };
+      this.regChk(param);
+      return this.getChk;
     };
     rules.push(regchk);
 
