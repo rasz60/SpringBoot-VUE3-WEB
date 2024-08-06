@@ -1,0 +1,77 @@
+package com.example.rmfr.board.entity;
+
+import com.example.rmfr.board.entity.item.ItemComments;
+import com.example.rmfr.board.entity.item.ItemHeaders;
+import com.example.rmfr.board.entity.item.ItemHits;
+import com.example.rmfr.board.entity.item.ItemLikes;
+import com.example.rmfr.member.entity.Members;
+import jakarta.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
+@Entity
+@Table(name = "boardItems")
+@Data
+@DynamicInsert
+@DynamicUpdate
+public class BoardItems {
+
+    // itemUuid : 게시물 고유번호
+    @Id
+    @GenericGenerator(name="uuid2", strategy = "uuid2")
+    @GeneratedValue(generator="uuid2")
+    @Column(columnDefinition = "VARCHAR(100)")
+    private String itemUuid;
+
+    // itemSeq : 게시물 순번
+    @Column(columnDefinition = "INT")
+    private int itemSeq;
+
+    // itemHeader : 게시물 말머리
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(referencedColumnName="itemHeaderId", name = "itemHeader")
+    private ItemHeaders itemHeader;
+
+    // itemTitle : 게시물 제목
+    @Column(columnDefinition = "VARCHAR(200)", nullable=false)
+    private String itemTitle;
+
+    // itemContents : 게시물 내용, MySQL LONGTEXT Type
+    @Lob
+    @Column(columnDefinition = "LONGTEXT", nullable=false)
+    private String itemContents;
+
+    // itemKeywords : 게시물 키워드, #을 구분자로하는 문자열
+    @Column(columnDefinition = "VARCHAR(1000)")
+    private String itemKeywords;
+
+    // itemStatus : 게시물 상태 - 0: 임시저장, 1: 등록, 2: 삭제
+    @Column(columnDefinition = "INT")
+    private int itemStatus;
+
+    // itemRegUuid : 게시물 등록자의 memUuid
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(referencedColumnName="memUuid", name = "itemRegUuid")
+    private Members itemRegUuid;
+
+    // itemRegDate : 게시물 등록일자
+    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime itemRegDate;
+
+    // itemUpdaterUuid : 게시물 수정자의 memUuid
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(referencedColumnName="memUuid", name = "itemUpdaterUuid")
+    private Members itemUpdaterUuid;
+
+    // itemUpdateDate : 게시물 수정 일자
+    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime itemUpdateDate;
+
+
+    public BoardItems() {}
+}
