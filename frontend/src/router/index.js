@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from "vue-router";
 import MainPage from "@/components/MainPage.vue";
 import SignupPage from "@/components/SignupPage.vue";
 import SettingPage from "@/components/SettingPage.vue";
+import NoticeBoard from "@/components/board/NoticeBoard.vue";
+import NoticeDetails from "@/components/board/NoticeDetails.vue";
+import NoticeForm from "@/components/board/NoticeForm.vue";
 const routes = [
   {
     path: "/",
@@ -17,6 +20,21 @@ const routes = [
     path: "/settings",
     name: "SettingPage",
     component: SettingPage,
+  },
+  {
+    path: "/board/notice",
+    name: "NoticeBoard",
+    component: NoticeBoard,
+  },
+  {
+    path: "/board/notice/form",
+    name: "NoticeForm",
+    component: NoticeForm,
+  },
+  {
+    path: "/board/notice/:seq",
+    name: "NoticeDetails",
+    component: NoticeDetails,
   },
 ];
 

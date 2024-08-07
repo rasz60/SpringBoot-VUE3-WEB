@@ -7,14 +7,10 @@ import java.security.Principal;
 
 @Controller
 @RequestMapping("/")
-public class MemeberController {
+public class RmfrController {
 
     public String main(Principal principal) {
         return "/index.html";
     };
 
-    @RequestMapping("/signup")
-    public String signup(Principal principal) {
-        return "/index.html";
-    };
 }
