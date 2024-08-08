@@ -69,6 +69,7 @@ public class Members implements UserDetails {
 
     @Builder
     public Members(MemberDto memberDto) {
+        this.memUuid = memberDto.getMemUuid();
         this.memId = memberDto.getMemId();
         this.memPw = memberDto.getMemPw();
         this.memEmail = memberDto.getMemEmail();

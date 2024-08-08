@@ -25,4 +25,12 @@ public class ItemHeaders {
     @Column(columnDefinition = "VARCHAR(20)")
     private String itemHeaderName;
 
+    // itemHeaderAuth : 말머리 권한, 1 - 일반, 2 - 관리자
+    @Column(columnDefinition = "INT DEFAULT 1")
+    private int itemHeaderAuth;
+
+    // itemHeaderSortOrder : 정렬기준
+    @Column(columnDefinition = "INT")
+    private int itemHeaderSortOrder;
+
 }

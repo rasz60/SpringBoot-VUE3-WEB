@@ -11,6 +11,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "itemComments")
@@ -63,5 +65,7 @@ public class ItemComments {
     @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime commentUpdateDate;
 
+    @OneToMany(mappedBy = "itemUuid", fetch = FetchType.EAGER)
+    List<ItemLikes> commentLikes = new ArrayList<>();
     public ItemComments() {}
 }

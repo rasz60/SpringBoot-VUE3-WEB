@@ -18,10 +18,6 @@ export const member = {
   }),
 
   mutations: {
-    [MEMBER.NULL_CHK](state, v) {
-      state.chk = !(v == "" || v == null);
-      if (!state.chk) state.msg = "필수 입력 값을 입력해주세요.";
-    },
     [MEMBER.REG_CHK](state, param) {
       state.chk = state.reg[param.type].test(param.value.trim());
       if (!state.chk) state.msg = state.regMsg[param.type];
@@ -35,10 +31,6 @@ export const member = {
   },
 
   actions: {
-    nullChk: ({ commit }, v) => {
-      commit(MEMBER.NULL_CHK, v);
-    },
-
     regChk: ({ commit }, param) => {
       commit(MEMBER.REG_CHK, param);
     },

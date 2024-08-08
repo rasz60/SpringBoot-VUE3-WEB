@@ -1,4 +1,4 @@
-package com.example.rmfr.member.controller;
+package com.example.rmfr.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

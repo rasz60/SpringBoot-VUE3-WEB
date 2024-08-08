@@ -1,7 +1,8 @@
 import { mapActions } from "vuex";
 
 export default {
-  ...mapActions("member", ["nullChk", "regChk"]),
+  ...mapActions("member", ["regChk"]),
+  ...mapActions("common", ["nullChk"]),
   init() {
     this.memId = "";
     this.memPw = "";

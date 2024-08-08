@@ -1,5 +1,6 @@
 package com.example.rmfr.board.entity;
 
+import com.example.rmfr.board.dto.BoardItemsDto;
 import com.example.rmfr.board.entity.item.ItemComments;
 import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.board.entity.item.ItemHits;
@@ -72,6 +73,27 @@ public class BoardItems {
     @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime itemUpdateDate;
 
+    @OneToMany(mappedBy = "itemUuid", fetch = FetchType.EAGER)
+    List<ItemHits> itemHits = new ArrayList<>();
+
+    @OneToMany(mappedBy = "itemUuid", fetch = FetchType.EAGER)
+    List<ItemLikes> itemLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "itemUuid", fetch = FetchType.EAGER)
+    List<ItemComments> itemComments = new ArrayList<>();
 
     public BoardItems() {}
+
+    public BoardItems(BoardItemsDto boardItemsDto) {
+        this.itemSeq = boardItemsDto.getItemSeq();
+        this.itemHeader = boardItemsDto.getItemHeader();
+        this.itemTitle = boardItemsDto.getItemTitle();
+        this.itemContents = boardItemsDto.getItemContents();
+        this.itemKeywords = boardItemsDto.getItemKeywords();
+        this.itemStatus = boardItemsDto.getItemStatus();
+        this.itemRegUuid = boardItemsDto.getItemRegUuid();
+        this.itemRegDate = boardItemsDto.getItemRegDate();
+        this.itemUpdaterUuid = boardItemsDto.getItemUpdaterUuid();
+        this.itemUpdateDate = boardItemsDto.getItemUpdateDate();
+    }
 }

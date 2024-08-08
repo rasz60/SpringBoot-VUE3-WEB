@@ -8,6 +8,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 @Data
 public class MemberDto {
+    private String memUuid;
     private String memId;
     private String memPw;
     private String memEmail;
@@ -19,6 +20,7 @@ public class MemberDto {
     private String memAddr2;
 
     public void of(Members member) {
+        this.memUuid = member.getMemUuid();
         this.memId = member.getMemId();
         this.memEmail = member.getMemEmail();
         this.memLevel = member.getMemLevel();

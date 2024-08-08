@@ -1,5 +1,6 @@
 import { createStore } from "vuex";
-import { member } from "./modules/memberStores";
+import { member } from "./modules/MemberStores";
+import { common } from "./modules/Commons";
 export const store = createStore({
-  modules: { member },
+  modules: { member, common },
 });

@@ -8,7 +8,10 @@
         <v-col cols="1">
           <v-card>#</v-card>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="1">
+          <v-card>말머리</v-card>
+        </v-col>
+        <v-col cols="5">
           <v-card>제목</v-card>
         </v-col>
         <v-col cols="1">
@@ -24,46 +27,44 @@
           <v-card>좋아요</v-card>
         </v-col>
       </v-row>
-      <v-row class="items" @click="fnMove(3)">
-        <v-col cols="1"> 3 </v-col>
-        <v-col cols="6" class="itemTitle">
-          <span> noticeadkfaskdfasdfasdfadfqwefqefads [4] </span>
+
+      <v-row
+        v-for="item in list"
+        :key="item"
+        class="items"
+        @click="fnMove(`details/` + item.itemSeq)"
+      >
+        <v-col cols="1">{{ item.itemSeq }}</v-col>
+        <v-col cols="1">{{ item.itemHeaderName }}</v-col>
+        <v-col cols="5" class="itemTitle">
+          <span> {{ item.itemTitle }} ({{ item.itemCommentsCnt }}) </span>
         </v-col>
-        <v-col cols="1"> rassayz60 </v-col>
-        <v-col cols="2"> 2024/08/06 12:00:00 </v-col>
-        <v-col cols="1"> 192 </v-col>
-        <v-col cols="1"> 99 </v-col>
-      </v-row>
-      <v-row class="items" @click="fnMove(2)">
-        <v-col cols="1"> 2 </v-col>
-        <v-col cols="6" class="itemTitle">
-          <span> noticeadkfaskdfasdfasdfadfqwefqefads [6] </span>
-        </v-col>
-        <v-col cols="1"> rassayz60 </v-col>
-        <v-col cols="2"> 2024/08/06 10:00:00 </v-col>
-        <v-col cols="1"> 92 </v-col>
-        <v-col cols="1"> 1 </v-col>
-      </v-row>
-      <v-row class="items" @click="fnMove(1)">
-        <v-col cols="1"> 1 </v-col>
-        <v-col cols="6" class="itemTitle">
-          <span> noticeadkfaskdfasdfasdfadfqwefqefads [7] </span>
-        </v-col>
-        <v-col cols="1"> rassayz60 </v-col>
-        <v-col cols="2"> 2024/08/06 09:00:00 </v-col>
-        <v-col cols="1"> 12 </v-col>
-        <v-col cols="1"> 9 </v-col>
+        <v-col cols="1"> {{ item.itemRegUuid.memId }} </v-col>
+        <v-col cols="2"> {{ item.itemRegDate.replace("T", " ") }} </v-col>
+        <v-col cols="1"> {{ item.itemHitsCnt }} </v-col>
+        <v-col cols="1"> {{ item.itemLikesCnt }} </v-col>
       </v-row>
 
       <v-row>
         <v-spacer></v-spacer>
-        <v-col cols="10">&lt; 1 | 2 | 3 | 4 | 5 | 6 | 7 &gt;</v-col>
+        <v-col cols="10">
+          <div class="text-center">
+            <v-pagination
+              v-model="page"
+              :length="totalPages"
+              total-visible="6"
+              @click="getBoardList"
+              next-icon="mdi-menu-right"
+              prev-icon="mdi-menu-left"
+            ></v-pagination>
+          </div>
+        </v-col>
         <v-col cols="1">
           <v-btn
             prepend-icon="mdi-plus-box-multiple-outline"
             color="primary"
             variant="tonal"
-            @click="fnMove('form')"
+            @click="fnMove('form/0')"
           >
             작성
           </v-btn>
@@ -76,7 +77,44 @@
 <script>
 export default {
   name: "NoticeBoard",
+  data() {
+    return {
+      itemStatus: 1,
+      list: [],
+      notContents: false,
+      totalPages: 0,
+      page: 0,
+      limit: 10,
+    };
+  },
+  async created() {
+    await this.getBoardList();
+  },
   methods: {
+    async getBoardList() {
+      var pg = this.page != 0 ? this.page - 1 : 0;
+
+      await this.axios
+        .get("/rest/boardList/" + this.itemStatus + "/" + pg + "/" + this.limit)
+        .then((res) => {
+          var rst = res.data;
+          this.list = rst.content;
+          if (rst.content.length > 0) {
+            this.page = rst.pageable.pageNumber + 1;
+            this.totalPages = rst.totalPages;
+            this.notContents = false;
+          } else {
+            this.page = 1;
+            this.totalPages = 1;
+            this.notContents = true;
+          }
+
+          console.log(this.page, this.totalPages, this.notContents);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
     fnMove(path) {
       this.$router.push("./notice/" + path);
     },
@@ -117,7 +155,7 @@ export default {
   }
 
   .v-row.items:hover {
-    background-color: rgba(250, 235, 215, 0.2);
+    background-color: rgba(255, 233, 228, 0.2);
     cursor: pointer;
 
     span {
