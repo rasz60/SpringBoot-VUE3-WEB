@@ -1,15 +1,11 @@
 <template>
+  <!-- form -->
   <v-form id="form" ref="boardFrm">
-    <div id="title">
-      <h1>NoTiCe</h1>
-    </div>
-
     <v-row>
       <v-col cols="2">
         <v-select
           label="말머리"
-          v-model="itemHeader"
-          :readonly="readonly"
+          v-model="item.itemHeader"
           :items="headers"
           variant="underlined"
         ></v-select>
@@ -19,8 +15,7 @@
           type="text"
           label="제목"
           variant="underlined"
-          :readonly="readonly"
-          v-model="title"
+          v-model="item.title"
           :rules="titleRules"
         ></v-text-field>
       </v-col>
@@ -31,8 +26,7 @@
           label="내용"
           rows="10"
           variant="outlined"
-          :readonly="readonly"
-          v-model="contents"
+          v-model="item.contents"
           :rules="contentRules"
         ></v-textarea>
       </v-col>
@@ -41,13 +35,11 @@
     <v-row>
       <v-col cols="12">
         <v-text-field
-          v-if="!readonly"
           variant="underlined"
-          :readonly="readonly"
           type="text"
           label="#tags"
           @keyup="fnAddTags"
-          v-model="keywords"
+          v-model="item.keywords"
         ></v-text-field>
       </v-col>
     </v-row>
@@ -55,7 +47,7 @@
     <v-row id="keywords">
       <v-col cols="12">
         <v-chip
-          v-for="tag in hashtags"
+          v-for="tag in item.hashtags"
           :key="tag"
           @click="fnTagDel(tag)"
           color="success"
@@ -73,7 +65,7 @@
         <v-btn
           prepend-icon="mdi-content-save-all-outline"
           color="secondary"
-          v-if="!readonly"
+          v-if="item.itemStatus == 0"
           variant="tonal"
           @click="fnValidate(0)"
           >임시저장</v-btn
@@ -81,10 +73,9 @@
         <v-btn
           prepend-icon="mdi-content-save-all"
           color="primary"
-          v-if="!readonly"
           variant="tonal"
           @click="fnValidate(1)"
-          >등록하기</v-btn
+          >저장하기</v-btn
         >
         <v-btn
           prepend-icon="mdi-format-list-bulleted-square"
@@ -102,26 +93,42 @@
 import { mapGetters, mapActions } from "vuex";
 
 export default {
+  props: {
+    flag: {
+      type: String,
+      required: true,
+    },
+    seq: {
+      type: String,
+      required: true,
+    },
+    items: {
+      type: Map,
+      required: true,
+    },
+  },
   name: "NoticeForm",
-  data: () => ({
-    title: "",
-    readonly: false,
-    keywords: "",
-    contents: "",
-    itemStatus: 0,
-    itemHeader: "",
-    itemKeywords: "",
-    headers: [],
-    hashtags: [],
-  }),
-  created() {
-    var flag = this.$route.params.flag;
-    this.readonly = flag == "details";
-    if (flag != "form") {
-      this.getDetails();
-    } else {
-      this.getHeaders();
-    }
+  data() {
+    return {
+      item: {
+        itemUuid: "",
+        title: "",
+        keywords: "",
+        contents: "",
+        itemStatus: 0,
+        itemHeader: "",
+        itemHeaderName: "",
+        itemKeywords: "",
+        itemLikesCnt: 0,
+        itemHitsCnt: 0,
+        hashtags: [],
+      },
+      headers: [],
+    };
+  },
+  async created() {
+    await this.getHeaders();
+    this.item = this.items;
   },
   computed: {
     ...mapGetters("common", ["getChk"]),
@@ -157,13 +164,13 @@ export default {
   methods: {
     ...mapActions("common", ["nullChk"]),
     initValue() {
-      this.title = "";
-      this.keywords = "";
-      this.contents = "";
-      this.itemStatus = 0;
-      this.itemHeader = "";
-      this.itemKeywords = "";
-      this.hashtags = [];
+      this.item.title = "";
+      this.item.keywords = "";
+      this.item.contents = "";
+      this.item.itemStatus = 0;
+      this.item.itemHeader = "";
+      this.item.itemKeywords = "";
+      this.item.hashtags = [];
     },
     async getHeaders() {
       await this.axios
@@ -181,21 +188,26 @@ export default {
           console.log(err);
         });
     },
-    fnMove(seq) {
-      this.$router.push("/board/notice" + (seq ? "/" + seq : ""));
+    fnMove(flag, seq) {
+      var param = "";
+
+      param += flag ? "/" + flag : "";
+      param += seq ? "/" + seq : "";
+
+      this.$router.push("/board/notice" + param);
     },
     fnAddTags($event) {
       var k = $event.keyCode;
-
+      console.log($event.keyCode);
       if (k == 13) {
         if (!this.fnKeywordChk()) {
-          this.keywords = "";
+          this.item.keywords = "";
           return false;
         }
 
-        if (this.hashtags.length < 30) {
-          this.itemKeywords += "#" + this.keywords.trim();
-          this.keywords = "";
+        if (this.item.hashtags.length < 30) {
+          this.item.itemKeywords += "#" + this.item.keywords.trim();
+          this.item.keywords = "";
         } else {
           alert("해시태그를 30개 이상 등록할 수 없습니다.");
         }
@@ -205,14 +217,14 @@ export default {
     },
     fnKeywordChk() {
       var chk = true;
-      var t = this.keywords.trim();
+      var t = this.item.keywords.trim();
 
       if (t.includes("#")) {
         alert("해시태그는 '#'을 포함할 수 없습니다.");
         return false;
       }
 
-      var bytes = this.getByteSize(this.itemKeywords + "#" + t);
+      var bytes = this.getByteSize(this.item.itemKeywords + "#" + t);
 
       if (bytes > 1000) {
         alert("모든 해시태그를 합쳐 1000bytes를 초과할 수 없습니다.");
@@ -220,8 +232,8 @@ export default {
       }
 
       if (t) {
-        for (var i = 0; i < this.hashtags.length; i++) {
-          if (this.hashtags[i] == t) {
+        for (var i = 0; i < this.item.hashtags.length; i++) {
+          if (this.item.hashtags[i] == t) {
             chk = false;
             break;
           }
@@ -249,29 +261,28 @@ export default {
     },
     fnTagDel(k) {
       var tmp = "";
-      for (var i = 0; i < this.hashtags.length; i++) {
-        if (this.hashtags[i] != k) {
-          tmp += "#" + this.hashtags[i];
+      for (var i = 0; i < this.item.hashtags.length; i++) {
+        if (this.item.hashtags[i] != k) {
+          tmp += "#" + this.item.hashtags[i];
         }
       }
-      this.itemKeywords = tmp;
+      this.item.itemKeywords = tmp;
     },
     async fnValidate(status) {
       var chk = await this.$refs.boardFrm.validate();
 
       if (chk.valid) {
-        this.itemStatus = status;
-
         var data = {
-          itemTitle: this.title,
-          itemHeaderId: this.itemHeader,
-          itemStatus: this.itemStatus,
-          itemKeywords: this.itemKeywords,
-          itemContents: this.contents,
+          itemUuid: this.item.itemUuid,
+          itemTitle: this.item.title,
+          itemHeaderId: this.item.itemHeader,
+          itemStatus: status,
+          itemKeywords: this.item.itemKeywords,
+          itemContents: this.item.contents,
         };
         await this.axios({
           method: "post", // HTTP 메서드
-          url: "/rest/board/reg", // 요청할 URL
+          url: "/rest/board/save", // 요청할 URL
           data: data, // 전송할 데이터
           headers: {
             Accept: "application/json", // 서버로부터 JSON 응답을 기대
@@ -297,11 +308,18 @@ export default {
         .get("/rest/item/" + seq)
         .then((res) => {
           var rst = res.data;
-
-          this.itemHeader = rst.itemHeader.itemHeaderName;
-          this.title = rst.itemTitle;
-          this.contents = rst.itemContents;
-          this.itemKeywords = rst.itemKeywords;
+          console.log(rst);
+          this.item.itemUuid = rst.itemUuid;
+          this.item.itemHeader = rst.itemHeaderId;
+          this.item.itemHeaderName = rst.itemHeaderName;
+          this.item.title = rst.itemTitle;
+          this.item.contents = rst.itemContents;
+          this.item.itemKeywords = rst.itemKeywords;
+          this.item.itemStatus = rst.itemStatus;
+          this.item.itemLikesCnt = rst.itemLikesCnt;
+          this.item.itemHitsCnt = rst.itemHitsCnt;
+          this.item.eAuth = rst.eauth;
+          this.item.dAuth = rst.dauth;
         })
         .catch((err) => {
           console.log(err);
@@ -309,25 +327,18 @@ export default {
     },
   },
   watch: {
-    itemKeywords(v) {
-      if (v) this.hashtags = v.substring(1).split("#");
-      else this.hashtags = [];
+    "item.itemKeywords"(v) {
+      if (v) this.item.hashtags = v.substring(1).split("#");
+      else this.item.hashtags = [];
     },
   },
 };
 </script>
 
-<style>
+<style lang="scss">
 #form {
   width: 100%;
 
-  div#title {
-    border-left: 6px solid red;
-    padding-left: 2em;
-    margin-left: 1em;
-    margin-top: 1em;
-    margin-bottom: 1.5em;
-  }
   .v-row {
     width: 95%;
     margin-left: 2em;

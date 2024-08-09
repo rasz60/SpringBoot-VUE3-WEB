@@ -5,6 +5,7 @@ import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.board.service.BoardItemsService;
 import com.example.rmfr.member.dto.MemberDto;
 import com.example.rmfr.member.service.MemberService;
+import com.example.rmfr.result.RestResults;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,14 +31,17 @@ public class BoardRestController {
         return boardItemsService.getItemHeaders(auth);
     }
 
-    @PostMapping("/rest/board/reg")
+    @PostMapping("/rest/board/save")
     @ResponseBody
-    public Map<String, String> regItem(@RequestBody BoardItemsDto boardItemsDto, Principal principal) {
+    public Map<String, String> saveItem(@RequestBody BoardItemsDto boardItemsDto, Principal principal) {
         Map<String, String> rst = new HashMap<>();
         try {
             if ( principal != null ) {
                 MemberDto member = memberService.getUserInfo(principal.getName());
-                rst = boardItemsService.regItem(boardItemsDto, member);
+
+                rst = "".equals(boardItemsDto.getItemUuid()) ?
+                        boardItemsService.regItem(boardItemsDto, member) :
+                        boardItemsService.updateItem(boardItemsDto, member);
             }
             else {
                 rst.put("resultCode", "400");
@@ -51,8 +55,7 @@ public class BoardRestController {
     @GetMapping("/rest/boardList/{itemStatus}/{page}/{limit}")
     public Page<BoardItemsDto> getBoardList(@PathVariable(value = "itemStatus") int itemStatus,
                                             @PathVariable(value = "page") int page,
-                                            @PathVariable("limit") int limit,
-                                            Principal principal) {
+                                            @PathVariable("limit") int limit) {
         Page<BoardItemsDto> dtos = null;
 
         try {
@@ -64,13 +67,65 @@ public class BoardRestController {
     }
 
     @GetMapping("/rest/item/{seq}")
-    public BoardItemsDto getBoardItem(@PathVariable(value = "seq") int seq) {
+    public BoardItemsDto getBoardItem(@PathVariable(value = "seq") int seq, Principal principal) {
         BoardItemsDto dto = new BoardItemsDto();
+        MemberDto member = null;
         try {
-            dto = boardItemsService.getBoardItem(seq);
+            if ( principal != null ) {
+                member = memberService.getUserInfo(principal.getName());
+            }
+            dto = boardItemsService.getBoardItem(seq, member);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
         return dto;
+    }
+
+    @PostMapping("/rest/item/addLike")
+    @ResponseBody
+    public RestResults addLike(@RequestBody BoardItemsDto boardItemsDto, Principal principal) {
+        RestResults rst = new RestResults();
+        MemberDto member = null;
+        try {
+            if ( principal != null ) {
+                member = memberService.getUserInfo(principal.getName());
+            }
+            rst = boardItemsService.addLike(boardItemsDto, member);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return rst;
+    }
+
+    @DeleteMapping("/rest/item/delLike")
+    @ResponseBody
+    public RestResults delLike(@RequestBody BoardItemsDto boardItemsDto, Principal principal) {
+        RestResults rst = new RestResults();
+        MemberDto member = null;
+        try {
+            if ( principal != null ) {
+                member = memberService.getUserInfo(principal.getName());
+            }
+            rst = boardItemsService.delLike(boardItemsDto, member);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return rst;
+    }
+
+    @PutMapping("/rest/delItem")
+    @ResponseBody
+    public RestResults delItem(@RequestBody BoardItemsDto boardItemsDto, Principal principal) {
+        RestResults rst = new RestResults();
+        MemberDto member = null;
+        try {
+            if ( principal != null ) {
+                member = memberService.getUserInfo(principal.getName());
+            }
+            rst = boardItemsService.delItem(boardItemsDto, member);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return rst;
     }
 }

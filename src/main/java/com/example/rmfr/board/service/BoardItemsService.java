@@ -4,6 +4,7 @@ import com.example.rmfr.board.dto.BoardItemsDto;
 import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.member.dto.MemberDto;
 import com.example.rmfr.member.entity.Members;
+import com.example.rmfr.result.RestResults;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -18,5 +19,13 @@ public interface BoardItemsService {
 
     public Map<String, String> regItem(BoardItemsDto boardItemsDto, MemberDto member);
 
-    public BoardItemsDto getBoardItem(int seq);
+    public BoardItemsDto getBoardItem(int seq, MemberDto memberDto);
+
+    public Map<String, String> updateItem(BoardItemsDto boardItemsDto, MemberDto member);
+
+    public RestResults addLike(BoardItemsDto boardItemsDto, MemberDto member);
+
+    public RestResults delLike(BoardItemsDto boardItemsDto, MemberDto member);
+
+    public RestResults delItem(BoardItemsDto boardItemsDto, MemberDto member);
 }

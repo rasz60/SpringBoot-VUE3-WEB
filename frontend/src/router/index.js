@@ -3,7 +3,7 @@ import MainPage from "@/components/MainPage.vue";
 import SignupPage from "@/components/SignupPage.vue";
 import SettingPage from "@/components/SettingPage.vue";
 import NoticeBoard from "@/components/board/NoticeBoard.vue";
-import NoticeForm from "@/components/board/NoticeForm.vue";
+import NoticeItemLayout from "@/components/board/NoticeItemLayout.vue";
 const routes = [
   {
     path: "/",
@@ -27,8 +27,8 @@ const routes = [
   },
   {
     path: "/board/notice/:flag/:seq",
-    name: "NoticeForm",
-    component: NoticeForm,
+    name: "NoticeItemLayout",
+    component: NoticeItemLayout,
   },
 ];
 

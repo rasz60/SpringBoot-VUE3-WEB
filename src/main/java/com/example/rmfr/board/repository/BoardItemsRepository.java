@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface BoardItemsRepository extends JpaRepository<BoardItems, Long>, JpaSpecificationExecutor<BoardItems> {
+public interface BoardItemsRepository extends JpaRepository<BoardItems, String>, JpaSpecificationExecutor<BoardItems> {
 
     BoardItems findByItemSeq(int seq);
 

@@ -22,6 +22,7 @@ public class ItemLikes {
     private String itemUuid;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long itemLikeId;
 
     // itemLikerUuid : 좋아요를 누른 회원의 UUID

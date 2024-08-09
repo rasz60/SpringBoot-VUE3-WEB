@@ -29,6 +29,11 @@ public class BoardItemsDto {
     private int itemLikesCnt;
     private int itemCommentsCnt;
 
+    private boolean eAuth;
+    private boolean dAuth;
+
+    private boolean likeItem;
+
     public BoardItemsDto() {}
 
     public BoardItemsDto(BoardItems boardItems) {
@@ -41,6 +46,7 @@ public class BoardItemsDto {
         this.itemTitle = boardItems.getItemTitle();
         this.itemContents = boardItems.getItemContents();
         this.itemKeywords = boardItems.getItemKeywords();
+        this.itemStatus = boardItems.getItemStatus();
         this.itemRegUuid = boardItems.getItemRegUuid();
         this.itemRegDate = boardItems.getItemRegDate();
         this.itemUpdaterUuid = boardItems.getItemUpdaterUuid();

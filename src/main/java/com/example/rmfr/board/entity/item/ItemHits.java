@@ -1,5 +1,6 @@
 package com.example.rmfr.board.entity.item;
 
+import com.example.rmfr.board.entity.BoardItems;
 import com.example.rmfr.member.entity.Members;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,10 +19,12 @@ import java.time.LocalDateTime;
 public class ItemHits {
 
     // itemUuid : 조회한 게시물의 고유번호
-    @Column(columnDefinition = "VARCHAR(100)")
-    private String itemUuid;
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(referencedColumnName="itemUuid", name = "itemUuid")
+    private BoardItems itemUuid;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long itemHitId;
 
     // itemHitMemUuid : 조회한 회원의 UUID

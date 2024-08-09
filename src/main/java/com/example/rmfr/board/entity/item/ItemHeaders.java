@@ -1,9 +1,6 @@
 package com.example.rmfr.board.entity.item;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
@@ -19,6 +16,7 @@ public class ItemHeaders {
 
     // itemHeaderId : 말머리 고유 번호
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long itemHeaderId;
 
     // itemHeaderName : 말머리 이름

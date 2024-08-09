@@ -6,6 +6,7 @@ import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.board.entity.item.ItemHits;
 import com.example.rmfr.board.entity.item.ItemLikes;
 import com.example.rmfr.member.entity.Members;
+import com.example.rmfr.member.dto.MemberDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
@@ -15,6 +16,8 @@ import org.hibernate.annotations.GenericGenerator;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Optional;
+
 @Entity
 @Table(name = "boardItems")
 @Data
@@ -95,5 +98,19 @@ public class BoardItems {
         this.itemRegDate = boardItemsDto.getItemRegDate();
         this.itemUpdaterUuid = boardItemsDto.getItemUpdaterUuid();
         this.itemUpdateDate = boardItemsDto.getItemUpdateDate();
+    }
+
+    public void of(BoardItemsDto boardItemsDto) {
+        this.itemTitle = boardItemsDto.getItemTitle();
+        this.itemHeader = boardItemsDto.getItemHeader();
+        this.itemContents = boardItemsDto.getItemContents();
+        this.itemKeywords = boardItemsDto.getItemKeywords();
+        this.itemStatus = boardItemsDto.getItemStatus();
+        this.itemUpdaterUuid = boardItemsDto.getItemUpdaterUuid();
+        this.itemUpdateDate = boardItemsDto.getItemUpdateDate();
+    }
+
+    public void setItemUpdaterUuid(MemberDto membersDto) {
+        this.setItemRegUuid(new Members(membersDto));
     }
 }
