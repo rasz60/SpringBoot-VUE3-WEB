@@ -1,5 +1,6 @@
 package com.example.rmfr.board.entity.item;
 
+import com.example.rmfr.board.dto.ItemCommentsDto;
 import com.example.rmfr.board.entity.BoardItems;
 import com.example.rmfr.member.entity.Members;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -33,6 +34,9 @@ public class ItemComments {
     @Column(columnDefinition = "VARCHAR(100)")
     private String commentUuid;
 
+    @Column(columnDefinition = "INT DEFAULT 0")
+    private int commentDepth;
+
     // commentParentUuid : 모댓글 고유번호
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
@@ -43,7 +47,7 @@ public class ItemComments {
     @Column(columnDefinition = "VARCHAR(300)")
     private String commentContents;
 
-    // commentStatus : 댓글 상태 - 0: 등록 / 1: 삭제 / 2: 신고 / 3: 신고로 인한 제재
+    // commentStatus : 댓글 상태 - 0: 등록 / 1: 삭제
     @Column(columnDefinition = "INT")
     private int commentStatus;
 
@@ -67,5 +71,25 @@ public class ItemComments {
 
     @OneToMany(mappedBy = "itemUuid", fetch = FetchType.EAGER)
     List<ItemLikes> commentLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "commentParentUuid", fetch = FetchType.EAGER)
+    List<ItemComments> childComments = new ArrayList<>();
+
+
     public ItemComments() {}
+
+    public static ItemComments of(ItemCommentsDto itemCommentsDto) {
+        ItemComments cmms = new ItemComments();
+
+        cmms.setItemUuid(itemCommentsDto.getItemUuid());
+        cmms.setCommentDepth(itemCommentsDto.getCommentDepth());
+        cmms.setCommentContents(itemCommentsDto.getCommentContents());
+        cmms.setCommentStatus(itemCommentsDto.getCommentStatus());
+        cmms.setCommentRegUuid(itemCommentsDto.getCommentRegUuid());
+        cmms.setCommentUpdaterUuid(itemCommentsDto.getCommentUpdaterUuid());
+        cmms.setCommentRegDate(itemCommentsDto.getCommentRegDate());
+        cmms.setCommentUpdateDate(itemCommentsDto.getCommentUpdateDate());
+
+        return cmms;
+    }
 }

@@ -78,7 +78,9 @@ export default {
         .get("/rest/item/" + seq)
         .then((res) => {
           var rst = res.data;
+
           console.log(rst);
+
           this.items.itemUuid = rst.itemUuid;
           if (rst.itemHeader != null)
             this.items.itemHeader = rst.itemHeader.itemHeaderId;
@@ -100,6 +102,7 @@ export default {
           this.items.likeItem = rst.likeItem;
           this.items.eAuth = rst.eauth;
           this.items.dAuth = rst.dauth;
+          this.items.cAuth = rst.cauth;
         })
         .catch((err) => {
           console.log(err);

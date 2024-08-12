@@ -1,6 +1,8 @@
 package com.example.rmfr.board.service;
 
 import com.example.rmfr.board.dto.BoardItemsDto;
+import com.example.rmfr.board.dto.ItemCommentsDto;
+import com.example.rmfr.board.entity.item.ItemComments;
 import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.member.dto.MemberDto;
 import com.example.rmfr.member.entity.Members;
@@ -23,9 +25,15 @@ public interface BoardItemsService {
 
     public Map<String, String> updateItem(BoardItemsDto boardItemsDto, MemberDto member);
 
-    public RestResults addLike(BoardItemsDto boardItemsDto, MemberDto member);
+    public RestResults addLike(String itemUuid, MemberDto member);
 
-    public RestResults delLike(BoardItemsDto boardItemsDto, MemberDto member);
+    public RestResults delLike(String itemUuid, MemberDto member);
 
     public RestResults delItem(BoardItemsDto boardItemsDto, MemberDto member);
+
+    public RestResults addReply(ItemCommentsDto itemCommentsDto, MemberDto member);
+
+    public List<ItemCommentsDto> getReplies(String itemUuid, String commentParentUuid, MemberDto member);
+
+    public RestResults delComment(String commentUuid, MemberDto member);
 }

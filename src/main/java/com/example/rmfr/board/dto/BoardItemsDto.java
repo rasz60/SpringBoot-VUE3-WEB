@@ -31,6 +31,7 @@ public class BoardItemsDto {
 
     private boolean eAuth;
     private boolean dAuth;
+    private boolean cAuth;
 
     private boolean likeItem;
 

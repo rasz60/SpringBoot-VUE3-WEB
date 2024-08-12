@@ -1,14 +1,13 @@
 package com.example.rmfr.board.service.impl;
 
 import com.example.rmfr.board.dto.BoardItemsDto;
+import com.example.rmfr.board.dto.ItemCommentsDto;
 import com.example.rmfr.board.entity.BoardItems;
+import com.example.rmfr.board.entity.item.ItemComments;
 import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.board.entity.item.ItemHits;
 import com.example.rmfr.board.entity.item.ItemLikes;
-import com.example.rmfr.board.repository.BoardItemsRepository;
-import com.example.rmfr.board.repository.ItemHeadersRepository;
-import com.example.rmfr.board.repository.ItemHitsRepository;
-import com.example.rmfr.board.repository.ItemLikesRepository;
+import com.example.rmfr.board.repository.*;
 import com.example.rmfr.board.service.BoardItemsService;
 import com.example.rmfr.board.spec.BoardItemsSpecifications;
 import com.example.rmfr.member.dto.MemberDto;
@@ -36,6 +35,7 @@ public class BoardItemsServiceImpl implements BoardItemsService {
     private final ItemHeadersRepository itemHeadersRepository;
     private final ItemHitsRepository itemHitsRepository;
     private final ItemLikesRepository itemLikesRepository;
+    private final ItemCommentsRepository itemCommentsRepository;
     @Override
     public Page<BoardItemsDto> getBoardList(int itemStatus, int page, int limit) {
         Page<BoardItemsDto> boardItemsDtos = null;
@@ -92,33 +92,39 @@ public class BoardItemsServiceImpl implements BoardItemsService {
         BoardItemsDto dto = new BoardItemsDto();
 
         try {
-            Members member = new Members(memberDto);
+            Members member = memberDto == null ? null : new Members(memberDto);
             BoardItems item = boardItemsRepository.findByItemSeq(seq);
 
-            // 조회수 체크
-            int hitChk = itemHitsRepository.countByItemUuidAndItemHitMemUuid(item, member).intValue();
+            if ( member != null ) {
+                // 조회수 체크
+                int hitChk = itemHitsRepository.countByItemUuidAndItemHitMemUuid(item, member).intValue();
 
-            // 처음 조회 시 조회수 up
-            if ( hitChk == 0 ) {
-                ItemHits hit = new ItemHits();
-                hit.setItemUuid(item);
-                hit.setItemHitMemUuid(member);
-                itemHitsRepository.save(hit);
-                item = boardItemsRepository.findByItemSeq(seq);
+                // 처음 조회 시 조회수 up
+                if (hitChk == 0) {
+                    ItemHits hit = new ItemHits();
+                    hit.setItemUuid(item);
+                    hit.setItemHitMemUuid(member);
+                    itemHitsRepository.save(hit);
+                    item = boardItemsRepository.findByItemSeq(seq);
+                }
             }
 
             dto = new BoardItemsDto(item);
+            boolean chk = false;
 
-            // 등록자 본인이거나, 관리자 일 때
-            boolean chk = memberDto.getMemUuid().equals(dto.getItemRegUuid().getMemUuid()) || memberDto.getMemLevel() > 1;
-
-            if ( chk ) {
-                dto.setEAuth(chk); // 수정 권한
-                dto.setDAuth(chk); // 삭제 권한
+            if (member != null ) {
+                // 등록자 본인이거나, 관리자 일 때
+                chk = memberDto.getMemUuid().equals(dto.getItemRegUuid().getMemUuid()) || memberDto.getMemLevel() > 1;
+                dto.setCAuth(true); // 댓글 권한, 회원이면 가능
             }
 
-            Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(item.getItemUuid(), member);
-            dto.setLikeItem(likes.intValue() > 0);
+            dto.setEAuth(chk); // 수정 권한
+            dto.setDAuth(chk); // 삭제 권한
+
+            if ( chk ) {
+                Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(item.getItemUuid(), member);
+                dto.setLikeItem(likes.intValue() > 0);
+            }
 
             dto.setItemLikesCnt(itemLikesRepository.countByItemUuid(item.getItemUuid()).intValue());
 
@@ -166,23 +172,23 @@ public class BoardItemsServiceImpl implements BoardItemsService {
     }
 
     @Override
-    public RestResults addLike(BoardItemsDto boardItemsDto, MemberDto memberDto) {
+    public RestResults addLike(String itemUuid, MemberDto memberDto) {
         RestResults rst = new RestResults();
         Map<String, Object> msg = new HashMap<>();
 
         try {
             Members member = new Members(memberDto);
 
-            Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(boardItemsDto.getItemUuid(), member);
+            Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(itemUuid, member);
 
             if ( likes == 0 ) {
                 ItemLikes like = new ItemLikes();
-                like.setItemUuid(boardItemsDto.getItemUuid());
+                like.setItemUuid(itemUuid);
                 like.setItemLikerUuid(member);
                 itemLikesRepository.save(like);
                 rst.setResultCode("200");
             }
-            msg.put("itemLikes", itemLikesRepository.countByItemUuid(boardItemsDto.getItemUuid()));
+            msg.put("itemLikes", itemLikesRepository.countByItemUuid(itemUuid));
             rst.getResultMessage().add(msg);
 
         } catch(Exception e) {
@@ -197,14 +203,14 @@ public class BoardItemsServiceImpl implements BoardItemsService {
     }
 
     @Override
-    public RestResults delLike(BoardItemsDto boardItemsDto, MemberDto member) {
+    public RestResults delLike(String itemUuid, MemberDto member) {
         RestResults rst = new RestResults();
         Map<String, Object> msg = new HashMap<>();
 
         try {
-            itemLikesRepository.findByItemUuidAndItemLikerUuid(boardItemsDto.getItemUuid(), new Members(member)).ifPresent(itemLikesRepository::delete);
+            itemLikesRepository.findByItemUuidAndItemLikerUuid(itemUuid, new Members(member)).ifPresent(itemLikesRepository::delete);
 
-            msg.put("itemLikes", itemLikesRepository.countByItemUuid(boardItemsDto.getItemUuid()));
+            msg.put("itemLikes", itemLikesRepository.countByItemUuid(itemUuid));
 
             rst.setResultCode("200");
             rst.getResultMessage().add(msg);
@@ -245,5 +251,118 @@ public class BoardItemsServiceImpl implements BoardItemsService {
             rst.getResultMessage().add(msg);
         }
         return rst;
+    }
+
+    @Override
+    public RestResults addReply(ItemCommentsDto itemCommentsDto, MemberDto member) {
+        RestResults rst = new RestResults();
+        Map<String, Object> msg = new HashMap<>();
+
+        try {
+            Members mem = new Members(member);
+
+            itemCommentsDto.setCommentStatus(0);
+            itemCommentsDto.setCommentRegUuid(mem);
+            itemCommentsDto.setCommentUpdaterUuid(mem);
+
+            ItemComments cmm = ItemComments.of(itemCommentsDto);
+
+            // parentComment 가 있을 때, set 해주기
+            if ( !"".equals(itemCommentsDto.getCommentParentUuid()) ) {
+                String pUuid = itemCommentsDto.getCommentParentUuid();
+                Optional<ItemComments> pCmm = itemCommentsRepository.findById(pUuid);
+                pCmm.ifPresent(cmm::setCommentParentUuid);
+            }
+
+            itemCommentsRepository.save(cmm);
+
+            rst.setResultCode("200");
+        } catch(Exception e) {
+            log.error(e.getMessage());
+
+            msg.put("error", e.getMessage());
+
+            rst.setResultCode("500");
+            rst.getResultMessage().add(msg);
+        }
+        return rst;
+    }
+
+    @Override
+    public List<ItemCommentsDto> getReplies(String itemUuid, String commentParentUuid, MemberDto member) {
+        List<ItemCommentsDto> cmmDtos = new ArrayList<>();
+        try {
+            List<ItemComments> cmms = new ArrayList<>();
+
+            if (! "0".equals(commentParentUuid) ) {
+                Optional<ItemComments> pCmm = itemCommentsRepository.findById(commentParentUuid);
+                if(pCmm.isPresent()) {
+                    ItemComments parentComment = pCmm.get();
+                    int depth = parentComment.getCommentDepth() + 1;
+                    cmms = itemCommentsRepository.findByItemUuidAndCommentParentUuidAndCommentDepth(itemUuid, parentComment, depth);
+                }
+            }
+
+            else cmms = itemCommentsRepository.findByItemUuid(itemUuid);
+
+
+            for (ItemComments cmm : cmms) {
+                ItemCommentsDto dto = ItemCommentsDto.of(cmm);
+                if ( member != null ) {
+                    // 로그인한 아이디로 좋아요를 누른 댓글 인지
+                    Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(cmm.getCommentUuid(), new Members(member));
+                    boolean likeCmm = likes > 0;
+                    dto.setLikeComment(likeCmm);
+
+                    // 로그인한 아이디로 작성된 댓글 인지? 수정/삭제 권한
+                    boolean regChk = authChk(member, dto.getCommentRegUuid().getMemUuid());
+                    dto.setEAuth(regChk);
+                    dto.setDAuth(regChk);
+                }
+                cmmDtos.add(dto);
+            }
+
+
+        } catch(Exception e) {
+            log.error(e.getMessage());
+        }
+        return cmmDtos;
+    }
+
+    @Override
+    public RestResults delComment(String commentUuid, MemberDto member) {
+        RestResults rst = new RestResults();
+        Map<String, Object> msg = new HashMap<>();
+
+        try {
+            Optional<ItemComments> comm = itemCommentsRepository.findById(commentUuid);
+            if ( comm.isPresent() ) {
+                ItemComments comment = comm.get();
+                if ( authChk(member, comment.getCommentRegUuid().getMemUuid()) ) {
+                    comment.setCommentStatus(1);
+                    comment.setCommentUpdaterUuid(new Members(member));
+                    comment.setCommentUpdateDate(LocalDateTime.now());
+                    itemCommentsRepository.save(comment);
+                    rst.setResultCode("200");
+                } else {
+                    rst.setResultCode("402");
+                    msg.put("message", "NOT AUTH.");
+                }
+            } else {
+                rst.setResultCode("401");
+                msg.put("message", "comment NOT FOUND.");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            msg.put("error", e.getMessage());
+
+            rst.setResultCode("500");
+            rst.getResultMessage().add(msg);
+        }
+        return rst;
+    }
+
+    public boolean authChk(MemberDto memberDto, String memUuid) {
+        return memberDto.getMemUuid().equals(memUuid) || memberDto.getMemLevel() > 1;
     }
 }

@@ -15,7 +15,7 @@
           :icon="likeItem ? `mdi-heart` : `mdi-heart-outline`"
           :color="likeItem ? `red` : ``"
           size="small"
-          @click="fnLike"
+          @click="fnLike()"
         />
         &nbsp;{{ itemLikes }}
       </v-col>
@@ -101,7 +101,7 @@
           :text="
             commentDrop
               ? `댓글 닫기`
-              : `댓글 보기 (` + this.items.itemCommentsCnt + `)`
+              : `댓글 보기 (` + items.itemCommentsCnt + `)`
           "
         >
         </v-btn>
@@ -109,22 +109,87 @@
       <v-divider></v-divider>
     </v-row>
     <v-row v-show="commentDrop">
-      <v-col cols="12">
-        <v-text-field
+      <v-col :cols="items.cAuth ? `11` : `12`">
+        <v-chip
+          id="commentTo"
+          v-if="commentsTarget != null"
+          prepend-icon="mdi-at"
+          variant="tonal"
+          color="purple"
+          @click="commentsTarget = null"
+        >
+          {{ commentsTarget.commentRegUuid.memId }} 님에게 댓글 남기기
+        </v-chip>
+        <v-textarea
+          rows="1"
+          id="comment"
           prepend-icon="mdi-forum-outline"
           type="text"
-          label="댓글 남기기"
+          :label="
+            items.cAuth
+              ? commentEdit
+                ? `댓글 수정...`
+                : `댓글...`
+              : `댓글을 작성하려면 로그인해주세요.`
+          "
+          :readonly="!items.cAuth"
+          v-model="commentContents"
           variant="underlined"
-        ></v-text-field>
+        >
+        </v-textarea>
+      </v-col>
+      <v-col cols="1">
+        <v-btn
+          prepend-icon="mdi-forum-outline"
+          @click="fnAddReply"
+          v-if="items.cAuth"
+          >작성하기</v-btn
+        >
       </v-col>
       <v-divider></v-divider>
     </v-row>
-    <v-row v-show="commentDrop" class="comments">
-      <v-col cols="2"> @rassayz60 </v-col>
-      <v-col cols="9"> 테스트 댓글 입니다아아아.</v-col>
+    <v-row
+      v-show="commentDrop"
+      v-for="(cmm, idx) in comments"
+      :key="cmm"
+      class="comments"
+      @click="fnReplyTarget(idx)"
+    >
+      <v-col cols="2"> @{{ cmm.commentRegUuid.memId }}</v-col>
+      <v-col cols="9">
+        {{ cmm.commentContents }}&nbsp;
+        <span class="rdate">
+          {{ cmm.commentUpdateDate.replace("T", " ") }}
+          {{ cmm.editYn ? `수정됨` : `` }}
+        </span>
+        <v-icon
+          v-if="cmm.eauth && cmm.commentStatus == 0"
+          icon="mdi-pencil-outline"
+          size="small"
+          @click.stop="fnEditComment(idx)"
+        />
+        <v-icon
+          v-if="cmm.dauth && cmm.commentStatus == 0"
+          icon="mdi-close"
+          size="small"
+          color="red"
+          @click.stop="fnDelComment(idx)"
+        />
+        <v-btn
+          variant="plain"
+          :text="`더보기(` + cmm.commentChildCnt + `)`"
+          @click="getReplies(items.itemUuid, cmm.commentUuid)"
+          v-if="cmm.childYn"
+        />
+      </v-col>
       <v-col cols="1">
-        <v-icon icon="mdi-heart-outline" size="small" @click="fnLike" />
-        99
+        <v-icon
+          :icon="cmm.likeComment ? `mdi-heart` : `mdi-heart-outline`"
+          :color="cmm.likeComment ? `red` : ``"
+          size="small"
+          @click.stop="fnLike(cmm.commentUuid, idx)"
+        />
+        {{ cmm.commentLikeCnt }}
       </v-col>
     </v-row>
   </v-sheet>
@@ -153,7 +218,14 @@ export default {
       likeItem: false,
       itemLikes: 0,
       commentDrop: false,
+      comments: [],
+      commentContents: "",
+      commentsTarget: null,
+      commentEdit: false,
     };
+  },
+  async created() {
+    await this.getReplies(this.items.itemUuid, null);
   },
   mounted() {
     this.itemHeaderName = this.items.itemHeaderName
@@ -171,29 +243,40 @@ export default {
 
       this.$emit("sendMessage", param);
     },
-    async fnLike() {
-      var method = this.likeItem ? `delete` : `post`;
-      var url = this.likeItem ? `/rest/item/delLike` : `/rest/item/addLike`;
+    async fnLike(id, idx) {
+      var itemChk = id != null; // true - comments / false - boardItem
+      var likeYn = itemChk ? this.comments[idx].likeComment : this.likeItem;
 
-      var data = {
-        itemUuid: this.items.itemUuid,
-      };
+      var method = likeYn ? `delete` : `post`;
+      var url = likeYn ? `/rest/item/delLike` : `/rest/item/addLike`;
+
+      var uuid = id ? id : this.items.itemUuid;
 
       await this.axios({
         method: method, // HTTP 메서드
         url: url, // 요청할 URL
-        data: data, // 전송할 데이터
+        data: uuid, // 전송할 데이터
         headers: {
           Accept: "application/json", // 서버로부터 JSON 응답을 기대
-          "Content-Type": "application/json", // 요청의 콘텐츠 타입을 JSON으로 설정
+          "Content-Type": "text/plain", // 요청의 콘텐츠 타입을 JSON으로 설정
         },
       })
         .then((res) => {
           var rst = res.data;
+          var cnt = rst.resultMessage[0].itemLikes;
 
-          this.itemLikes = rst.resultMessage[0].itemLikes;
-          this.likeItem =
-            rst.resultCode == "200" ? !this.likeItem : this.likeItem;
+          if (itemChk) {
+            // comment 일 때
+            var like = this.comments[idx].likeComment;
+            this.comments[idx].likeComment =
+              rst.resultCode == "200" ? !like : like;
+            this.comments[idx].commentLikeCnt = cnt;
+          } else {
+            // boardItem 일 때
+            this.itemLikes = cnt;
+            this.likeItem =
+              rst.resultCode == "200" ? !this.likeItem : this.likeItem;
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -227,6 +310,104 @@ export default {
           });
       }
     },
+    async fnAddReply() {
+      var itemUuid = this.items.itemUuid;
+      var pId = "";
+      var depth = 0;
+
+      if (this.commentsTarget != null) {
+        if (this.commentEdit) {
+          // 댓글 수정
+          pId = this.commentsTarget.parentComment.commentUuid;
+          depth = this.commentsTarget.commentDepth;
+        } else {
+          // 대댓글 작성
+          pId = this.commentsTarget.commentUuid;
+          depth = Number(this.commentsTarget.commentDepth) + 1;
+        }
+      }
+
+      var data = {
+        itemUuid: itemUuid,
+        commentParentUuid: pId,
+        commentContents: this.commentContents,
+        commentDepth: depth,
+      };
+
+      await this.axios
+        .post("/rest/addReply", data)
+        .then((res) => {
+          var resultCode = res.data.resultCode;
+
+          if (resultCode == "200") this.$router.go(0);
+          else alert("rmfr 회원만 댓글을 작성할 수 있습니다.");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    async getReplies(itemId, parentId) {
+      var param = "/" + itemId;
+      param += parentId ? "/" + parentId : "/0";
+
+      await this.axios
+        .get("/rest/getReplies" + param)
+        .then((res) => {
+          var resultCode = res.data.resultCode;
+          this.comments = res.data.resultMessage[0].result;
+          if (resultCode != "200") {
+            alert("댓글을 불러오는 중 오류가 발생하였습니다.");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    fnEditComment(idx) {
+      var target = this.comments[idx];
+
+      this.commentContents = target.commentContents;
+
+      this.commentsTarget = target.parentComment;
+      this.commentEdit = true;
+
+      document.querySelector("#comment").focus();
+    },
+    fnReplyTarget(idx) {
+      this.commentsTarget = this.comments[idx];
+      this.commentEdit = false;
+
+      document.querySelector("#comment").focus();
+    },
+    async fnDelComment(idx) {
+      var delUuid = this.comments[idx].commentUuid;
+
+      await this.axios({
+        method: "put", // HTTP 메서드
+        url: "/rest/delComment", // 요청할 URL
+        data: delUuid, // 전송할 데이터
+        headers: {
+          Accept: "application/json", // 서버로부터 JSON 응답을 기대
+          "Content-Type": "text/plain", // 요청의 콘텐츠 타입을 JSON으로 설정
+        },
+      })
+        .then((res) => {
+          var rst = res.data.resultCode;
+
+          if (rst == "200") {
+            this.$route.go(0);
+          } else if (rst == "500") {
+            alert("일시적인 오류로 댓글 삭제에 실패하였습니다.");
+            return false;
+          } else {
+            alert("다시 로그인해주세요.");
+            this.$router.push("/");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
   },
   watch: {
     flag(v) {
@@ -244,6 +425,12 @@ export default {
     margin-right: 2em;
 
     .v-col {
+      margin: auto 0;
+
+      #commentTo {
+        margin-bottom: 0.4em;
+      }
+
       .v-btn {
         margin: 0.2em;
       }
@@ -267,6 +454,16 @@ export default {
 
     .info {
       text-align: right;
+    }
+  }
+  .comments {
+    margin: 2em;
+    cursor: pointer;
+
+    .rdate {
+      margin: 0.5em;
+      font-size: 12px;
+      color: darkgray;
     }
   }
 }
