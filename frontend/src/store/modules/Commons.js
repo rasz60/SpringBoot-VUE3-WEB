@@ -15,7 +15,7 @@ export const common = {
   },
 
   getters: {
-    getChk: (state) => {
+    getCommChk: (state) => {
       return state.chk ? true : state.msg;
     },
   },

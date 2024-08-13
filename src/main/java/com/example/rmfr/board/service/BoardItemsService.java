@@ -25,10 +25,6 @@ public interface BoardItemsService {
 
     public Map<String, String> updateItem(BoardItemsDto boardItemsDto, MemberDto member);
 
-    public RestResults addLike(String itemUuid, MemberDto member);
-
-    public RestResults delLike(String itemUuid, MemberDto member);
-
     public RestResults delItem(BoardItemsDto boardItemsDto, MemberDto member);
 
     public RestResults addReply(ItemCommentsDto itemCommentsDto, MemberDto member);

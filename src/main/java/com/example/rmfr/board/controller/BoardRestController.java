@@ -2,9 +2,10 @@ package com.example.rmfr.board.controller;
 
 import com.example.rmfr.board.dto.BoardItemsDto;
 import com.example.rmfr.board.dto.ItemCommentsDto;
-import com.example.rmfr.board.entity.item.ItemComments;
 import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.board.service.BoardItemsService;
+import com.example.rmfr.board.service.ItemCommentsService;
+import com.example.rmfr.board.service.ItemLikesService;
 import com.example.rmfr.member.dto.MemberDto;
 import com.example.rmfr.member.service.MemberService;
 import com.example.rmfr.result.RestResults;
@@ -13,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Member;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +24,8 @@ import java.util.Map;
 public class BoardRestController {
 
     private final BoardItemsService boardItemsService;
+    private final ItemLikesService itemLikesService;
+    private final ItemCommentsService itemCommentsService;
     private final MemberService memberService;
     @GetMapping("/rest/itemHeaders")
     public List<ItemHeaders> itemHeaders(Principal principal) {
@@ -33,6 +35,8 @@ public class BoardRestController {
 
         return boardItemsService.getItemHeaders(auth);
     }
+
+    /* Items */
 
     @PostMapping("/rest/board/save")
     @ResponseBody
@@ -84,44 +88,6 @@ public class BoardRestController {
         return dto;
     }
 
-    @PostMapping("/rest/item/addLike")
-    @ResponseBody
-    public RestResults addLike(@RequestBody String itemUuid, Principal principal) {
-        RestResults rst = new RestResults();
-        MemberDto member = null;
-        try {
-            if ( principal != null ) {
-                member = memberService.getUserInfo(principal.getName());
-                rst = boardItemsService.addLike(itemUuid, member);
-            } else {
-                rst.setResultCode("400");
-            }
-        } catch (Exception e) {
-            rst.setResultCode("500");
-            log.error(e.getMessage());
-        }
-        return rst;
-    }
-
-    @DeleteMapping("/rest/item/delLike")
-    @ResponseBody
-    public RestResults delLike(@RequestBody String itemUuid, Principal principal) {
-        RestResults rst = new RestResults();
-        MemberDto member = null;
-        try {
-            if ( principal != null ) {
-                member = memberService.getUserInfo(principal.getName());
-                rst = boardItemsService.delLike(itemUuid, member);
-            } else {
-                rst.setResultCode("400");
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            rst.setResultCode("500");
-        }
-        return rst;
-    }
-
     @PutMapping("/rest/delItem")
     @ResponseBody
     public RestResults delItem(@RequestBody BoardItemsDto boardItemsDto, Principal principal) {
@@ -141,25 +107,49 @@ public class BoardRestController {
         return rst;
     }
 
-    @PostMapping("/rest/addReply")
+    /* Likes */
+
+    @PostMapping("/rest/item/addLike")
     @ResponseBody
-    public RestResults addReply(@RequestBody ItemCommentsDto itemCommentsDto,Principal principal) {
+    public RestResults addLike(@RequestBody String itemUuid, Principal principal) {
         RestResults rst = new RestResults();
         MemberDto member = null;
         try {
             if ( principal != null ) {
                 member = memberService.getUserInfo(principal.getName());
-                rst = boardItemsService.addReply(itemCommentsDto, member);
+                rst = itemLikesService.addLike(itemUuid, member);
             } else {
                 rst.setResultCode("400");
             }
         } catch (Exception e) {
+            rst.setResultCode("500");
             log.error(e.getMessage());
         }
         return rst;
     }
 
-    @GetMapping("/rest/getReplies/{itemUuid}/{commentParentUuid}/{depth}")
+    @DeleteMapping("/rest/item/delLike")
+    @ResponseBody
+    public RestResults delLike(@RequestBody String itemUuid, Principal principal) {
+        RestResults rst = new RestResults();
+        MemberDto member = null;
+        try {
+            if ( principal != null ) {
+                member = memberService.getUserInfo(principal.getName());
+                rst = itemLikesService.delLike(itemUuid, member);
+            } else {
+                rst.setResultCode("400");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            rst.setResultCode("500");
+        }
+        return rst;
+    }
+
+    /* Comments */
+
+    @GetMapping("/rest/getReplies/{itemUuid}/{commentParentUuid}")
     public RestResults getReplies(@PathVariable("itemUuid") String itemUuid,
                                   @PathVariable(value = "commentParentUuid", required = false) String commentParentUuid,
                                   Principal principal) {
@@ -170,7 +160,7 @@ public class BoardRestController {
             if ( principal != null ) {
                 member = memberService.getUserInfo(principal.getName());
             }
-            msg.put("result", boardItemsService.getReplies(itemUuid, commentParentUuid, member));
+            msg.put("result", itemCommentsService.getReplies(itemUuid, commentParentUuid, member));
             rst.setResultCode("200");
             rst.getResultMessage().add(msg);
         } catch (Exception e) {
@@ -179,6 +169,24 @@ public class BoardRestController {
 
             rst.setResultCode("500");
             rst.getResultMessage().add(msg);
+        }
+        return rst;
+    }
+
+    @PostMapping("/rest/addReply")
+    @ResponseBody
+    public RestResults addReply(@RequestBody ItemCommentsDto itemCommentsDto,Principal principal) {
+        RestResults rst = new RestResults();
+        MemberDto member = null;
+        try {
+            if ( principal != null ) {
+                member = memberService.getUserInfo(principal.getName());
+                rst = itemCommentsService.addReply(itemCommentsDto, member);
+            } else {
+                rst.setResultCode("400");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
         return rst;
     }
@@ -192,7 +200,7 @@ public class BoardRestController {
         try {
             if ( principal != null ) {
                 member = memberService.getUserInfo(principal.getName());
-                rst = boardItemsService.delComment(commentUuid, member);
+                rst = itemCommentsService.delComment(commentUuid, member);
             } else {
                 rst.setResultCode("400");
                 msg.put("message", "NOT FOUND LOGIN USER.");

@@ -9,5 +9,7 @@ public interface ItemCommentsRepository extends JpaRepository<ItemComments, Stri
 
     public List<ItemComments> findByItemUuid(String itemUuid);
 
+    public List<ItemComments> findByItemUuidAndCommentDepth(String itemUuid, int depth);
+
     public List<ItemComments> findByItemUuidAndCommentParentUuidAndCommentDepth(String itemUuid, ItemComments commentParentUuid, int depth);
 }

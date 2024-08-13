@@ -116,15 +116,14 @@ public class BoardItemsServiceImpl implements BoardItemsService {
                 // 등록자 본인이거나, 관리자 일 때
                 chk = memberDto.getMemUuid().equals(dto.getItemRegUuid().getMemUuid()) || memberDto.getMemLevel() > 1;
                 dto.setCAuth(true); // 댓글 권한, 회원이면 가능
+                
+                // 좋아요 여부
+                Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(item.getItemUuid(), member);
+                dto.setLikeItem(likes > 0);
             }
 
             dto.setEAuth(chk); // 수정 권한
             dto.setDAuth(chk); // 삭제 권한
-
-            if ( chk ) {
-                Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(item.getItemUuid(), member);
-                dto.setLikeItem(likes.intValue() > 0);
-            }
 
             dto.setItemLikesCnt(itemLikesRepository.countByItemUuid(item.getItemUuid()).intValue());
 
@@ -168,61 +167,6 @@ public class BoardItemsServiceImpl implements BoardItemsService {
             rst.put("resultCode", "500");
         }
 
-        return rst;
-    }
-
-    @Override
-    public RestResults addLike(String itemUuid, MemberDto memberDto) {
-        RestResults rst = new RestResults();
-        Map<String, Object> msg = new HashMap<>();
-
-        try {
-            Members member = new Members(memberDto);
-
-            Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(itemUuid, member);
-
-            if ( likes == 0 ) {
-                ItemLikes like = new ItemLikes();
-                like.setItemUuid(itemUuid);
-                like.setItemLikerUuid(member);
-                itemLikesRepository.save(like);
-                rst.setResultCode("200");
-            }
-            msg.put("itemLikes", itemLikesRepository.countByItemUuid(itemUuid));
-            rst.getResultMessage().add(msg);
-
-        } catch(Exception e) {
-            log.error(e.getMessage());
-
-            msg.put("error", e.getMessage());
-
-            rst.setResultCode("500");
-            rst.getResultMessage().add(msg);
-        }
-        return rst;
-    }
-
-    @Override
-    public RestResults delLike(String itemUuid, MemberDto member) {
-        RestResults rst = new RestResults();
-        Map<String, Object> msg = new HashMap<>();
-
-        try {
-            itemLikesRepository.findByItemUuidAndItemLikerUuid(itemUuid, new Members(member)).ifPresent(itemLikesRepository::delete);
-
-            msg.put("itemLikes", itemLikesRepository.countByItemUuid(itemUuid));
-
-            rst.setResultCode("200");
-            rst.getResultMessage().add(msg);
-
-        } catch(Exception e) {
-            log.error(e.getMessage());
-
-            msg.put("error", e.getMessage());
-
-            rst.setResultCode("500");
-            rst.getResultMessage().add(msg);
-        }
         return rst;
     }
 

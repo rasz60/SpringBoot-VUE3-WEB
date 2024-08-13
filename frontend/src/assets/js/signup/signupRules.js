@@ -1,18 +1,19 @@
 import { mapGetters } from "vuex";
 
 export default {
-  ...mapGetters("member", ["getChk"]),
+  ...mapGetters("member", ["getMemChk"]),
+  ...mapGetters("common", ["getCommChk"]),
   idRules() {
     const rules = [];
     const idNullChk = (v) => {
       this.nullChk(v);
-      return this.getChk;
+      return this.getCommChk;
     };
     rules.push(idNullChk);
     const idRegChk = (v) => {
       var param = { type: "id", value: v };
       this.regChk(param);
-      return this.getChk;
+      return this.getMemChk;
     };
     rules.push(idRegChk);
     return rules;
@@ -22,14 +23,14 @@ export default {
 
     const pwNullChk = (v) => {
       this.nullChk(v);
-      return this.getChk;
+      return this.getCommChk;
     };
     rules.push(pwNullChk);
 
     const regChk = (v) => {
       var param = { type: "pw", value: v };
       this.regChk(param);
-      return this.getChk;
+      return this.getMemChk;
     };
     rules.push(regChk);
 
@@ -55,14 +56,14 @@ export default {
 
     const mailNullChk = (v) => {
       this.nullChk(v);
-      return this.getChk;
+      return this.getCommChk;
     };
     rules.push(mailNullChk);
 
     const regchk = (v) => {
       var param = { type: "mail", value: v };
       this.regChk(param);
-      return this.getChk;
+      return this.getMemChk;
     };
     rules.push(regchk);
 

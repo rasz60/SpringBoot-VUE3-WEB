@@ -29,6 +29,7 @@ public class ItemCommentsDto {
     private boolean editYn;
     private boolean likeComment;
     private boolean childYn;
+    private boolean childOpen;
     private boolean eAuth;
     private boolean dAuth;
     public ItemCommentsDto() {}
@@ -42,6 +43,7 @@ public class ItemCommentsDto {
 
         if ( itemComments.getCommentParentUuid() != null) {
             dto.setParentComment(ItemCommentsDto.of(itemComments.getCommentParentUuid()));
+            dto.setCommentParentUuid(dto.getParentComment().getCommentParentUuid());
         }
         dto.setCommentStatus(itemComments.getCommentStatus());
 

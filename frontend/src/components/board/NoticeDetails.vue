@@ -152,11 +152,16 @@
       v-show="commentDrop"
       v-for="(cmm, idx) in comments"
       :key="cmm"
-      class="comments"
+      :class="`comments depth-` + cmm.commentDepth"
       @click="fnReplyTarget(idx)"
     >
       <v-col cols="2"> @{{ cmm.commentRegUuid.memId }}</v-col>
       <v-col cols="9">
+        <v-icon
+          v-if="cmm.commentDepth > 0"
+          icon="mdi-arrow-right-bottom"
+          size="small"
+        />
         {{ cmm.commentContents }}&nbsp;
         <span class="rdate">
           {{ cmm.commentUpdateDate.replace("T", " ") }}
@@ -178,7 +183,7 @@
         <v-btn
           variant="plain"
           :text="`더보기(` + cmm.commentChildCnt + `)`"
-          @click="getReplies(items.itemUuid, cmm.commentUuid)"
+          @click="getReplies(items.itemUuid, cmm.commentUuid, idx)"
           v-if="cmm.childYn"
         />
       </v-col>
@@ -225,7 +230,7 @@ export default {
     };
   },
   async created() {
-    await this.getReplies(this.items.itemUuid, null);
+    await this.getReplies(this.items.itemUuid, null, null);
   },
   mounted() {
     this.itemHeaderName = this.items.itemHeaderName
@@ -324,6 +329,11 @@ export default {
           // 대댓글 작성
           pId = this.commentsTarget.commentUuid;
           depth = Number(this.commentsTarget.commentDepth) + 1;
+
+          if (depth > 5) {
+            alert("더 이상의 대댓글을 작성할 수 없습니다.");
+            return false;
+          }
         }
       }
 
@@ -346,7 +356,12 @@ export default {
           console.log(err);
         });
     },
-    async getReplies(itemId, parentId) {
+    async getReplies(itemId, parentId, idx) {
+      if (parentId != null && this.comments[idx].childOpen) {
+        this.childCmmCtrl(1, idx);
+        return false;
+      }
+
       var param = "/" + itemId;
       param += parentId ? "/" + parentId : "/0";
 
@@ -354,7 +369,14 @@ export default {
         .get("/rest/getReplies" + param)
         .then((res) => {
           var resultCode = res.data.resultCode;
-          this.comments = res.data.resultMessage[0].result;
+          var rst = res.data.resultMessage[0].result;
+
+          if (parentId) {
+            this.childCmmCtrl(0, idx, rst);
+          } else {
+            this.comments = rst;
+          }
+
           if (resultCode != "200") {
             alert("댓글을 불러오는 중 오류가 발생하였습니다.");
           }
@@ -395,7 +417,8 @@ export default {
           var rst = res.data.resultCode;
 
           if (rst == "200") {
-            this.$route.go(0);
+            alert("댓글이 삭제되었습니다.");
+            this.$router.go(0);
           } else if (rst == "500") {
             alert("일시적인 오류로 댓글 삭제에 실패하였습니다.");
             return false;
@@ -407,6 +430,28 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+    childCmmCtrl(type, idx, rst) {
+      var nx = 0;
+      if (type == 0) {
+        // 더보기 댓글 열기
+        nx = idx + 1;
+        for (var i = nx; i - nx < rst.length; i++) {
+          this.comments.splice(i, 0, rst[i - nx]);
+        }
+        this.comments[idx].childOpen = true;
+      } else {
+        // 더보기 댓글 닫기
+        nx = this.comments.length - 1;
+        var cmm = this.comments[idx];
+        for (var j = nx; j > idx; j--) {
+          var pCmm = this.comments[j].parentComment;
+          if (pCmm != null && pCmm.commentUuid == cmm.commentUuid) {
+            this.comments.splice(j, 1);
+          }
+        }
+        this.comments[idx].childOpen = false;
+      }
     },
   },
   watch: {
@@ -465,6 +510,25 @@ export default {
       font-size: 12px;
       color: darkgray;
     }
+  }
+  .depth-1 {
+    padding-left: 0.5em;
+  }
+
+  .depth-2 {
+    padding-left: 1em;
+  }
+
+  .depth-3 {
+    padding-left: 1.5em;
+  }
+
+  .depth-4 {
+    padding-left: 2em;
+  }
+
+  .depth-5 {
+    padding-left: 2.5em;
   }
 }
 </style>

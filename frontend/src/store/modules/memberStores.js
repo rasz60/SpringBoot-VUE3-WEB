@@ -25,7 +25,7 @@ export const member = {
   },
 
   getters: {
-    getChk: (state) => {
+    getMemChk: (state) => {
       return state.chk ? true : state.msg;
     },
   },
