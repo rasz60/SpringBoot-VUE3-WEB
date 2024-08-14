@@ -3,7 +3,6 @@ package com.example.rmfr.board.service.impl;
 import com.example.rmfr.board.entity.item.ItemLikes;
 import com.example.rmfr.board.repository.ItemLikesRepository;
 import com.example.rmfr.board.service.ItemLikesService;
-import com.example.rmfr.member.dto.MemberDto;
 import com.example.rmfr.member.entity.Members;
 import com.example.rmfr.result.RestResults;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +19,16 @@ public class ItemLikesServiceImpl implements ItemLikesService {
     private final ItemLikesRepository itemLikesRepository;
 
     @Override
-    public RestResults addLike(String itemUuid, MemberDto memberDto) {
+    public int likeCount(String itemUuid) {
+        return itemLikesRepository.countByItemUuid(itemUuid).intValue();
+    }
+
+    @Override
+    public RestResults addLike(String itemUuid, Members member) {
         RestResults rst = new RestResults();
         Map<String, Object> msg = new HashMap<>();
 
         try {
-            Members member = new Members(memberDto);
-
             Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(itemUuid, member);
 
             if ( likes == 0 ) {
@@ -34,42 +36,30 @@ public class ItemLikesServiceImpl implements ItemLikesService {
                 like.setItemUuid(itemUuid);
                 like.setItemLikerUuid(member);
                 itemLikesRepository.save(like);
-                rst.setResultCode("200");
+                rst.setResultCode(200);
             }
-            msg.put("itemLikes", itemLikesRepository.countByItemUuid(itemUuid));
-            rst.getResultMessage().add(msg);
+
+            rst.setResult("itemLikes", likeCount(itemUuid));
 
         } catch(Exception e) {
             log.error(e.getMessage());
-
-            msg.put("error", e.getMessage());
-
-            rst.setResultCode("500");
-            rst.getResultMessage().add(msg);
+            rst.setResultCode(500);
         }
         return rst;
     }
 
     @Override
-    public RestResults delLike(String itemUuid, MemberDto member) {
+    public RestResults delLike(String itemUuid, Members member) {
         RestResults rst = new RestResults();
         Map<String, Object> msg = new HashMap<>();
 
         try {
-            itemLikesRepository.findByItemUuidAndItemLikerUuid(itemUuid, new Members(member)).ifPresent(itemLikesRepository::delete);
-
-            msg.put("itemLikes", itemLikesRepository.countByItemUuid(itemUuid));
-
-            rst.setResultCode("200");
-            rst.getResultMessage().add(msg);
-
+            itemLikesRepository.findByItemUuidAndItemLikerUuid(itemUuid, member).ifPresent(itemLikesRepository::delete);
+            rst.setResultCode(200);
+            rst.setResult("itemLikes", likeCount(itemUuid));
         } catch(Exception e) {
             log.error(e.getMessage());
-
-            msg.put("error", e.getMessage());
-
-            rst.setResultCode("500");
-            rst.getResultMessage().add(msg);
+            rst.setResultCode(500);
         }
         return rst;
     }

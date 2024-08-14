@@ -98,18 +98,24 @@ export default {
         .get("/rest/boardList/" + this.itemStatus + "/" + pg + "/" + this.limit)
         .then((res) => {
           var rst = res.data;
-          this.list = rst.content;
-          if (rst.content.length > 0) {
-            this.page = rst.pageable.pageNumber + 1;
-            this.totalPages = rst.totalPages;
-            this.notContents = false;
-          } else {
-            this.page = 1;
-            this.totalPages = 1;
-            this.notContents = true;
-          }
+          var resultCode = rst.resultCode;
 
-          console.log(this.page, this.totalPages, this.notContents);
+          if (resultCode == 200) {
+            var rstList = rst.result.boardList;
+            this.list = rstList.content;
+
+            if (rstList.content.length > 0) {
+              this.page = rstList.pageable.pageNumber + 1;
+              this.totalPages = rstList.totalPages;
+              this.notContents = false;
+            } else {
+              this.page = 1;
+              this.totalPages = 1;
+              this.notContents = true;
+            }
+          } else {
+            alert(rst.resultMessage);
+          }
         })
         .catch((err) => {
           console.log(err);

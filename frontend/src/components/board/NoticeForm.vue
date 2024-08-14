@@ -176,12 +176,20 @@ export default {
       await this.axios
         .get("/rest/itemHeaders")
         .then((res) => {
-          var data = res.data;
-          for (var i = 0; i < data.length; i++) {
-            this.headers[i] = {
-              title: data[i].itemHeaderName,
-              value: data[i].itemHeaderId,
-            };
+          var rst = res.data;
+          var resultCode = rst.resultCode;
+
+          if (resultCode == 200) {
+            var data = rst.result.itemHeaders;
+            for (var i = 0; i < data.length; i++) {
+              this.headers[i] = {
+                title: data[i].itemHeaderName,
+                value: data[i].itemHeaderId,
+              };
+            }
+          } else {
+            alert(rst.resultMessage);
+            if (resultCode == 400) location.href = "/logout";
           }
         })
         .catch((err) => {
@@ -290,9 +298,9 @@ export default {
           },
         })
           .then((res) => {
-            var rst = res.data.resultCode;
-            if (rst == "200") {
-              alert("게시물 등록이 완료되었습니다.");
+            var resultCode = res.data.resultCode;
+            alert(res.data.resultMessage);
+            if (resultCode == 200) {
               this.initValue();
               this.$router.push("/board/notice");
             }
@@ -301,29 +309,6 @@ export default {
             console.log(err);
           });
       }
-    },
-    async getDetails() {
-      var seq = this.$route.params.seq;
-      await this.axios
-        .get("/rest/item/" + seq)
-        .then((res) => {
-          var rst = res.data;
-          console.log(rst);
-          this.item.itemUuid = rst.itemUuid;
-          this.item.itemHeader = rst.itemHeaderId;
-          this.item.itemHeaderName = rst.itemHeaderName;
-          this.item.title = rst.itemTitle;
-          this.item.contents = rst.itemContents;
-          this.item.itemKeywords = rst.itemKeywords;
-          this.item.itemStatus = rst.itemStatus;
-          this.item.itemLikesCnt = rst.itemLikesCnt;
-          this.item.itemHitsCnt = rst.itemHitsCnt;
-          this.item.eAuth = rst.eauth;
-          this.item.dAuth = rst.dauth;
-        })
-        .catch((err) => {
-          console.log(err);
-        });
     },
   },
   watch: {

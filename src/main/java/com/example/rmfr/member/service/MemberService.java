@@ -1,12 +1,14 @@
 package com.example.rmfr.member.service;
 
 import com.example.rmfr.member.dto.MemberDto;
+import com.example.rmfr.member.entity.Members;
 
 import java.util.Map;
 
 public interface MemberService {
     public Long idDupChk(String memId);
     public Map<String, Object> sendVerifyCode(String memEmail);
+    public Members findByMemId(String memId);
     public String signup(MemberDto memberDto);
     public int countByMemEmail(String memEmail);
     public Map<String, Object> sendIdList(String memEmail);

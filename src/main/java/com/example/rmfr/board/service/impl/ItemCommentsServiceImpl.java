@@ -23,7 +23,7 @@ public class ItemCommentsServiceImpl implements ItemCommentsService {
     private final ItemLikesRepository itemLikesRepository;
 
     @Override
-    public List<ItemCommentsDto> getReplies(String itemUuid, String commentParentUuid, MemberDto member) {
+    public List<ItemCommentsDto> getReplies(String itemUuid, String commentParentUuid, Members member) {
         List<ItemCommentsDto> cmmDtos = new ArrayList<>();
         try {
             List<ItemComments> cmms = new ArrayList<>();
@@ -44,7 +44,7 @@ public class ItemCommentsServiceImpl implements ItemCommentsService {
                 ItemCommentsDto dto = ItemCommentsDto.of(cmm);
                 if ( member != null ) {
                     // 로그인한 아이디로 좋아요를 누른 댓글 인지
-                    Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(cmm.getCommentUuid(), new Members(member));
+                    Long likes = itemLikesRepository.countByItemUuidAndItemLikerUuid(cmm.getCommentUuid(), member);
                     boolean likeCmm = likes > 0;
                     dto.setLikeComment(likeCmm);
 
@@ -64,16 +64,13 @@ public class ItemCommentsServiceImpl implements ItemCommentsService {
     }
 
     @Override
-    public RestResults addReply(ItemCommentsDto itemCommentsDto, MemberDto member) {
+    public RestResults addReply(ItemCommentsDto itemCommentsDto, Members member) {
         RestResults rst = new RestResults();
-        Map<String, Object> msg = new HashMap<>();
 
         try {
-            Members mem = new Members(member);
-
             itemCommentsDto.setCommentStatus(0);
-            itemCommentsDto.setCommentRegUuid(mem);
-            itemCommentsDto.setCommentUpdaterUuid(mem);
+            itemCommentsDto.setCommentRegUuid(member);
+            itemCommentsDto.setCommentUpdaterUuid(member);
 
             ItemComments cmm = ItemComments.of(itemCommentsDto);
 
@@ -86,20 +83,16 @@ public class ItemCommentsServiceImpl implements ItemCommentsService {
 
             itemCommentsRepository.save(cmm);
 
-            rst.setResultCode("200");
+            rst.setResultCode(200);
         } catch(Exception e) {
             log.error(e.getMessage());
-
-            msg.put("error", e.getMessage());
-
-            rst.setResultCode("500");
-            rst.getResultMessage().add(msg);
+            rst.setResultCode(500);
         }
         return rst;
     }
 
     @Override
-    public RestResults delComment(String commentUuid, MemberDto member) {
+    public RestResults delComment(String commentUuid, Members member) {
         RestResults rst = new RestResults();
         Map<String, Object> msg = new HashMap<>();
 
@@ -109,29 +102,26 @@ public class ItemCommentsServiceImpl implements ItemCommentsService {
                 ItemComments comment = comm.get();
                 if ( authChk(member, comment.getCommentRegUuid().getMemUuid()) ) {
                     comment.setCommentStatus(1);
-                    comment.setCommentUpdaterUuid(new Members(member));
+                    comment.setCommentUpdaterUuid(member);
                     comment.setCommentUpdateDate(LocalDateTime.now());
                     itemCommentsRepository.save(comment);
-                    rst.setResultCode("200");
+                    rst.setResultCode(200);
                 } else {
-                    rst.setResultCode("402");
-                    msg.put("message", "NOT AUTH.");
+                    rst.setResultCode(400);
+                    rst.setResultMessage("댓글 삭제 권한", 0);
                 }
             } else {
-                rst.setResultCode("401");
-                msg.put("message", "comment NOT FOUND.");
+                rst.setResultCode(400);
+                rst.setResultMessage("삭제할 댓글", 0);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            msg.put("error", e.getMessage());
-
-            rst.setResultCode("500");
-            rst.getResultMessage().add(msg);
+            rst.setResultCode(500);
         }
         return rst;
     }
 
-    public boolean authChk(MemberDto memberDto, String memUuid) {
-        return memberDto.getMemUuid().equals(memUuid) || memberDto.getMemLevel() > 1;
+    public boolean authChk(Members member, String memUuid) {
+        return member.getMemUuid().equals(memUuid) || member.getMemLevel() > 1;
     }
 }

@@ -268,19 +268,19 @@ export default {
       })
         .then((res) => {
           var rst = res.data;
-          var cnt = rst.resultMessage[0].itemLikes;
+          var cnt = rst.result.itemLikes;
 
           if (itemChk) {
             // comment 일 때
             var like = this.comments[idx].likeComment;
             this.comments[idx].likeComment =
-              rst.resultCode == "200" ? !like : like;
+              rst.resultCode == 200 ? !like : like;
             this.comments[idx].commentLikeCnt = cnt;
           } else {
             // boardItem 일 때
             this.itemLikes = cnt;
             this.likeItem =
-              rst.resultCode == "200" ? !this.likeItem : this.likeItem;
+              rst.resultCode == 200 ? !this.likeItem : this.likeItem;
           }
         })
         .catch((err) => {
@@ -304,9 +304,8 @@ export default {
         })
           .then((res) => {
             var rst = res.data;
-
-            if (rst.resultCode == "200") {
-              alert("게시물이 삭제되었습니다.");
+            alert(rst.resultMessage);
+            if (rst.resultCode != "500") {
               this.$router.push("/board/notice");
             }
           })
@@ -347,10 +346,11 @@ export default {
       await this.axios
         .post("/rest/addReply", data)
         .then((res) => {
-          var resultCode = res.data.resultCode;
+          var rst = res.data;
+          var resultCode = rst.resultCode;
 
+          alert(rst.resultMessage);
           if (resultCode == "200") this.$router.go(0);
-          else alert("rmfr 회원만 댓글을 작성할 수 있습니다.");
         })
         .catch((err) => {
           console.log(err);
@@ -368,17 +368,19 @@ export default {
       await this.axios
         .get("/rest/getReplies" + param)
         .then((res) => {
-          var resultCode = res.data.resultCode;
-          var rst = res.data.resultMessage[0].result;
+          var rst = res.data;
+          var resultCode = rst.resultCode;
 
-          if (parentId) {
-            this.childCmmCtrl(0, idx, rst);
+          if (resultCode == 200) {
+            var cmms = rst.result.comments;
+
+            if (parentId) {
+              this.childCmmCtrl(0, idx, cmms);
+            } else {
+              this.comments = cmms;
+            }
           } else {
-            this.comments = rst;
-          }
-
-          if (resultCode != "200") {
-            alert("댓글을 불러오는 중 오류가 발생하였습니다.");
+            alert(rst.resultMessage);
           }
         })
         .catch((err) => {
@@ -414,16 +416,13 @@ export default {
         },
       })
         .then((res) => {
-          var rst = res.data.resultCode;
+          var rst = res.data;
+          var resultCode = rst.resultCode;
 
-          if (rst == "200") {
-            alert("댓글이 삭제되었습니다.");
+          alert(rst.resultMessage);
+          if (resultCode == 200) {
             this.$router.go(0);
-          } else if (rst == "500") {
-            alert("일시적인 오류로 댓글 삭제에 실패하였습니다.");
-            return false;
-          } else {
-            alert("다시 로그인해주세요.");
+          } else if (resultCode == 401) {
             this.$router.push("/");
           }
         })

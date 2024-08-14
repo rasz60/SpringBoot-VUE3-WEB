@@ -46,6 +46,7 @@ public class MemberRestController {
     }
 
     @GetMapping("/rest/loginUserInfo")
+    @CrossOrigin(origins = "http://localhost:8081", allowCredentials = "true")
     public MemberDto loginUserInfo(Principal principal) {
         MemberDto member = null;
         if (principal != null) {

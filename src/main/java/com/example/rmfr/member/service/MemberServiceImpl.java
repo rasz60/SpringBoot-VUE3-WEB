@@ -89,6 +89,14 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     }
 
     @Override
+    public Members findByMemId(String memId) {
+        Members member = memberRepository.findByMemIdAndMemDelYn(memId, "N")
+                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+
+        return member;
+    }
+
+    @Override
     public int countByMemEmail(String memEmail) {
         int cnt = 0;
         try {

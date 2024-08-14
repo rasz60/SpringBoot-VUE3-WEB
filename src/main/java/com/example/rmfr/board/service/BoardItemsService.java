@@ -15,21 +15,15 @@ import java.util.Map;
 
 @Service
 public interface BoardItemsService {
-    public Page<BoardItemsDto> getBoardList(int itemStatus, int page, int limit);
+    public RestResults getBoardList(int itemStatus, int page, int limit);
 
     public List<ItemHeaders> getItemHeaders(int auth);
 
-    public Map<String, String> regItem(BoardItemsDto boardItemsDto, MemberDto member);
+    public RestResults regItem(BoardItemsDto boardItemsDto, Members member);
 
-    public BoardItemsDto getBoardItem(int seq, MemberDto memberDto);
+    public RestResults getBoardItem(int seq, Members memberDto);
 
-    public Map<String, String> updateItem(BoardItemsDto boardItemsDto, MemberDto member);
+    public RestResults updateItem(BoardItemsDto boardItemsDto, Members member);
 
-    public RestResults delItem(BoardItemsDto boardItemsDto, MemberDto member);
-
-    public RestResults addReply(ItemCommentsDto itemCommentsDto, MemberDto member);
-
-    public List<ItemCommentsDto> getReplies(String itemUuid, String commentParentUuid, MemberDto member);
-
-    public RestResults delComment(String commentUuid, MemberDto member);
+    public RestResults delItem(BoardItemsDto boardItemsDto, Members member);
 }

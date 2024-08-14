@@ -81,16 +81,20 @@ public class Members implements UserDetails {
         this.memAddr2 = memberDto.getMemAddr2();
     }
 
-    public void of(MemberDto memberDto) {
-        if ( !"".equals(memberDto.getMemPw()) ) {
-            this.memPw = memberDto.getMemPw();
-            this.memPwUpdateDate = LocalDateTime.now();
+    public static Members of(MemberDto memberDto) {
+        Members member = new Members();
+
+        if ( memberDto.getMemPw() != null && !memberDto.getMemPw().isEmpty() ) {
+            member.setMemPw(memberDto.getMemPw());
+            member.setMemPwUpdateDate(LocalDateTime.now());
         }
-        this.memEmail = memberDto.getMemEmail();
-        this.memPhone = memberDto.getMemPhone();
-        this.zipcode = memberDto.getZipcode();
-        this.memAddr1 = memberDto.getMemAddr1();
-        this.memAddr2 = memberDto.getMemAddr2();
+        member.setMemEmail(memberDto.getMemEmail());
+        member.setMemPhone(memberDto.getMemPhone());
+        member.setZipcode(memberDto.getZipcode());
+        member.setMemAddr1(memberDto.getMemAddr1());
+        member.setMemAddr2(memberDto.getMemAddr2());
+
+        return member;
     }
 
     @Override

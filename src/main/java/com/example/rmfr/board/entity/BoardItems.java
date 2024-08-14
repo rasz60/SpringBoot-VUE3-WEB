@@ -100,17 +100,31 @@ public class BoardItems {
         this.itemUpdateDate = boardItemsDto.getItemUpdateDate();
     }
 
-    public void of(BoardItemsDto boardItemsDto) {
-        this.itemTitle = boardItemsDto.getItemTitle();
-        this.itemHeader = boardItemsDto.getItemHeader();
-        this.itemContents = boardItemsDto.getItemContents();
-        this.itemKeywords = boardItemsDto.getItemKeywords();
-        this.itemStatus = boardItemsDto.getItemStatus();
-        this.itemUpdaterUuid = boardItemsDto.getItemUpdaterUuid();
-        this.itemUpdateDate = boardItemsDto.getItemUpdateDate();
+    public static BoardItems of(BoardItemsDto boardItemsDto) {
+        BoardItems boardItems = new BoardItems();
+
+        boardItems.setItemUuid(boardItems.getItemUuid());
+        boardItems.setItemSeq(boardItems.getItemSeq());
+        boardItems.setItemHeader(boardItemsDto.getItemHeader());
+        boardItems.setItemTitle(boardItemsDto.getItemTitle());
+        boardItems.setItemContents(boardItemsDto.getItemContents());
+        boardItems.setItemKeywords(boardItemsDto.getItemKeywords());
+        boardItems.setItemStatus(boardItemsDto.getItemStatus());
+        boardItems.setItemRegUuid(boardItemsDto.getItemRegUuid());
+        boardItems.setItemRegDate(boardItemsDto.getItemRegDate());
+        boardItems.setItemUpdaterUuid(boardItemsDto.getItemUpdaterUuid());
+        boardItems.setItemUpdateDate(boardItemsDto.getItemUpdateDate());
+
+        return boardItems;
     }
 
-    public void setItemUpdaterUuid(MemberDto membersDto) {
-        this.setItemRegUuid(new Members(membersDto));
+    public void updateItems(BoardItemsDto boardItemsDto) {
+        this.setItemHeader(boardItemsDto.getItemHeader());
+        this.setItemTitle(boardItemsDto.getItemTitle());
+        this.setItemContents(boardItemsDto.getItemContents());
+        this.setItemKeywords(boardItemsDto.getItemKeywords());
+        this.setItemStatus(boardItemsDto.getItemStatus());
+        this.setItemUpdaterUuid(boardItemsDto.getItemUpdaterUuid());
+        this.setItemUpdateDate(boardItemsDto.getItemUpdateDate());
     }
 }

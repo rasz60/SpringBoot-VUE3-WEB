@@ -4,6 +4,7 @@ import SignupPage from "@/components/SignupPage.vue";
 import SettingPage from "@/components/SettingPage.vue";
 import NoticeBoard from "@/components/board/NoticeBoard.vue";
 import NoticeItemLayout from "@/components/board/NoticeItemLayout.vue";
+
 const routes = [
   {
     path: "/",
@@ -41,7 +42,7 @@ const router = createRouter({
 });
 
 // 라우터 변경 시마다 화면을 뿌리기 전에 실행
-router.beforeEach(() => {
+router.beforeEach(async () => {
   // local storage에 로그인 정보 가져오기
   var loginInfo = JSON.parse(localStorage.getItem("rmfrLoginInfo"));
 

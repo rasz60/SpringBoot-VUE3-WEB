@@ -78,31 +78,37 @@ export default {
         .get("/rest/item/" + seq)
         .then((res) => {
           var rst = res.data;
+          var resultCode = rst.resultCode;
 
-          console.log(rst);
+          if (resultCode == 200) {
+            var rstItem = rst.result.item;
 
-          this.items.itemUuid = rst.itemUuid;
-          if (rst.itemHeader != null)
-            this.items.itemHeader = rst.itemHeader.itemHeaderId;
-          this.items.itemHeaderName = rst.itemHeaderName;
-          this.items.title = rst.itemTitle;
-          this.items.contents = rst.itemContents;
-          this.items.itemKeywords = rst.itemKeywords;
-          if (this.items.itemKeywords) {
-            this.items.hashtags = this.items.itemKeywords
-              .substring(1)
-              .split("#");
+            this.items.itemUuid = rstItem.itemUuid;
+            if (rstItem.itemHeader != null)
+              this.items.itemHeader = rstItem.itemHeader.itemHeaderId;
+            this.items.itemHeaderName = rstItem.itemHeaderName;
+            this.items.title = rstItem.itemTitle;
+            this.items.contents = rstItem.itemContents;
+            this.items.itemKeywords = rstItem.itemKeywords;
+            if (this.items.itemKeywords) {
+              this.items.hashtags = this.items.itemKeywords
+                .substring(1)
+                .split("#");
+            }
+            this.items.itemStatus = rstItem.itemStatus;
+            this.items.itemLikesCnt = rstItem.itemLikesCnt;
+            this.items.itemHitsCnt = rstItem.itemHitsCnt;
+            this.items.itemCommentsCnt = rstItem.itemCommentsCnt;
+            this.items.itemRegUuid = rstItem.itemRegUuid;
+            this.items.itemRegDate = rstItem.itemRegDate.replace("T", " ");
+            this.items.likeItem = rstItem.likeItem;
+            this.items.eAuth = rstItem.eauth;
+            this.items.dAuth = rstItem.dauth;
+            this.items.cAuth = rstItem.cauth;
+          } else {
+            alert(rst.resultMessage);
+            this.$router.push("/board/notice");
           }
-          this.items.itemStatus = rst.itemStatus;
-          this.items.itemLikesCnt = rst.itemLikesCnt;
-          this.items.itemHitsCnt = rst.itemHitsCnt;
-          this.items.itemCommentsCnt = rst.itemCommentsCnt;
-          this.items.itemRegUuid = rst.itemRegUuid;
-          this.items.itemRegDate = rst.itemRegDate.replace("T", " ");
-          this.items.likeItem = rst.likeItem;
-          this.items.eAuth = rst.eauth;
-          this.items.dAuth = rst.dauth;
-          this.items.cAuth = rst.cauth;
         })
         .catch((err) => {
           console.log(err);
