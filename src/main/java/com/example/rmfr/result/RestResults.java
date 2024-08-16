@@ -24,7 +24,7 @@ public class RestResults {
     private static int RSLT_400 = 400;
     private static String RSLT_400_MSG = "를 찾지 못했습니다.";
     private static int RSLT_401 = 401;
-    private static String RSLT_401_MSG = "로그인 정보를 찾지 못했습니다.";
+    private static String RSLT_401_MSG = "회원만 사용할 수 있는 기능입니다.";
 
     // resultCode : 50X - SYSTEM_ERROR
     private static int RSLT_500 = 500;

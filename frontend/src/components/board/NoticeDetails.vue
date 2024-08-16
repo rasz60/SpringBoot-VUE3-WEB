@@ -182,8 +182,12 @@
         />
         <v-btn
           variant="plain"
-          :text="`더보기(` + cmm.commentChildCnt + `)`"
-          @click="getReplies(items.itemUuid, cmm.commentUuid, idx)"
+          :text="
+            cmm.childOpen
+              ? `대댓글 닫기`
+              : `더보기(` + cmm.commentChildCnt + `)`
+          "
+          @click.stop="getReplies(items.itemUuid, cmm.commentUuid, idx)"
           v-if="cmm.childYn"
         />
       </v-col>
@@ -249,8 +253,8 @@ export default {
       this.$emit("sendMessage", param);
     },
     async fnLike(id, idx) {
-      var itemChk = id != null; // true - comments / false - boardItem
-      var likeYn = itemChk ? this.comments[idx].likeComment : this.likeItem;
+      var cmmChk = id != null; // true - comments / false - boardItem
+      var likeYn = cmmChk ? this.comments[idx].likeComment : this.likeItem;
 
       var method = likeYn ? `delete` : `post`;
       var url = likeYn ? `/rest/item/delLike` : `/rest/item/addLike`;
@@ -268,19 +272,25 @@ export default {
       })
         .then((res) => {
           var rst = res.data;
-          var cnt = rst.result.itemLikes;
+          var resultCode = rst.resultCode;
 
-          if (itemChk) {
-            // comment 일 때
-            var like = this.comments[idx].likeComment;
-            this.comments[idx].likeComment =
-              rst.resultCode == 200 ? !like : like;
-            this.comments[idx].commentLikeCnt = cnt;
+          if (resultCode == 200) {
+            var cnt = rst.result.itemLikes;
+
+            if (cmmChk) {
+              // comment 일 때
+              var like = this.comments[idx].likeComment;
+              this.comments[idx].likeComment =
+                rst.resultCode == 200 ? !like : like;
+              this.comments[idx].commentLikeCnt = cnt;
+            } else {
+              // boardItem 일 때
+              this.itemLikes = cnt;
+              this.likeItem =
+                rst.resultCode == 200 ? !this.likeItem : this.likeItem;
+            }
           } else {
-            // boardItem 일 때
-            this.itemLikes = cnt;
-            this.likeItem =
-              rst.resultCode == 200 ? !this.likeItem : this.likeItem;
+            alert(rst.resultMessage);
           }
         })
         .catch((err) => {
@@ -431,31 +441,42 @@ export default {
         });
     },
     childCmmCtrl(type, idx, rst) {
-      var nx = 0;
+      var nx = idx + 1;
+      var tmp = [];
+
+      // 더보기 댓글 열기
       if (type == 0) {
-        // 더보기 댓글 열기
-        nx = idx + 1;
+        // 선택한 댓글의 다음 index 부터 반복
         for (var i = nx; i - nx < rst.length; i++) {
-          this.comments.splice(i, 0, rst[i - nx]);
+          this.comments.splice(i, 0, rst[i - nx]); // rst 배열 값을 하나씩 추가
         }
-        this.comments[idx].childOpen = true;
-      } else {
-        // 더보기 댓글 닫기
-        nx = this.comments.length - 1;
-        var cmm = this.comments[idx];
-        for (var j = nx; j > idx; j--) {
-          var pCmm = this.comments[j].parentComment;
-          if (pCmm != null && pCmm.commentUuid == cmm.commentUuid) {
-            this.comments.splice(j, 1);
+        this.comments[idx].childOpen = true; // 선택한 댓글의 자식 댓글 오픈 여부 변경
+      }
+      // 더보기 댓글 닫기, 하위 댓글까지 모두 닫기
+      else {
+        var childCnt = 0; // 하위 대댓글 개수
+        tmp.push(this.comments[idx]); // 닫기 대상이 되는 부모 댓글 배열에 추가
+
+        // 선택한 댓글 다음 index 부터 반복
+        for (var j = nx; j < this.comments.length; j++) {
+          var pCmm = this.comments[j].parentComment; // 해당 index의 부모 댓글
+
+          // 부모 댓글이 있을 때
+          if (pCmm != null) {
+            // tmp 배열 안에 있는 부모 댓글과 일치하는지 확인
+            for (var k = 0; k < tmp.length; k++) {
+              if (tmp[k].commentUuid == pCmm.commentUuid) {
+                // 일치하면 해당 댓글의 자식 댓글도 모두 닫혀야하므로 해당 댓글을 대상 부모 댓글 배열에 추가
+                tmp.push(this.comments[j]);
+                childCnt++;
+                break;
+              }
+            }
           }
         }
-        this.comments[idx].childOpen = false;
+        this.comments.splice(nx, childCnt); // 선택 댓글 다음 index 부터 자식 댓글 개수 만큼 잘라내기
+        this.comments[idx].childOpen = false; // 선택한 댓글의 자식 댓글 오픈 여부 변경
       }
-    },
-  },
-  watch: {
-    flag(v) {
-      console.log(v);
     },
   },
 };
@@ -509,6 +530,9 @@ export default {
       font-size: 12px;
       color: darkgray;
     }
+  }
+  .comments:hover {
+    background-color: aliceblue;
   }
   .depth-1 {
     padding-left: 0.5em;
