@@ -19,15 +19,19 @@ public class MemberDto {
     private String memAddr1;
     private String memAddr2;
 
-    public void of(Members member) {
-        this.memUuid = member.getMemUuid();
-        this.memId = member.getMemId();
-        this.memEmail = member.getMemEmail();
-        this.memLevel = member.getMemLevel();
-        this.memPwUpdateDate = member.getMemPwUpdateDate();
-        this.memPhone = member.getMemPhone();
-        this.zipcode = member.getZipcode();
-        this.memAddr1 = member.getMemAddr1();
-        this.memAddr2 = member.getMemAddr2();
+    public static MemberDto of(Members member) {
+        MemberDto dto = new MemberDto();
+
+        dto.setMemUuid(member.getMemUuid());
+        dto.setMemId(member.getMemId());
+        dto.setMemEmail(member.getMemEmail());
+        dto.setMemLevel(member.getMemLevel());
+        dto.setMemPwUpdateDate(member.getMemPwUpdateDate());
+        dto.setMemPhone(member.getMemPhone());
+        dto.setZipcode(member.getZipcode());
+        dto.setMemAddr1(member.getMemAddr1());
+        dto.setMemAddr2(member.getMemAddr2());
+
+        return dto;
     }
 }

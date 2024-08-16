@@ -66,7 +66,7 @@ export default {
 }
 
 #menu {
-  margin-top: 6.1em;
+  margin-top: 5em;
   .v-row {
     margin: 0;
     width: 100vw;

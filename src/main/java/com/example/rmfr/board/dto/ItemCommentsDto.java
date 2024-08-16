@@ -2,10 +2,7 @@ package com.example.rmfr.board.dto;
 
 import com.example.rmfr.board.entity.item.ItemComments;
 import com.example.rmfr.member.entity.Members;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 

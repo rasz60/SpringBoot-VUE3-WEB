@@ -1,7 +1,6 @@
 package com.example.rmfr.board.entity.item;
 
 import com.example.rmfr.board.dto.ItemCommentsDto;
-import com.example.rmfr.board.entity.BoardItems;
 import com.example.rmfr.member.entity.Members;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -23,7 +22,7 @@ import java.util.List;
 @DynamicUpdate
 public class ItemComments {
 
-    // itemUuid : 댓글이 달린 게시물의 고유번호
+    // itemUuid : 댓글을 작성한 게시물의 고유번호
     @Column(columnDefinition = "VARCHAR(100)")
     private String itemUuid;
 
@@ -34,6 +33,7 @@ public class ItemComments {
     @Column(columnDefinition = "VARCHAR(100)")
     private String commentUuid;
 
+    // commentDepth : 댓글 계층 레벨
     @Column(columnDefinition = "INT DEFAULT 0")
     private int commentDepth;
 

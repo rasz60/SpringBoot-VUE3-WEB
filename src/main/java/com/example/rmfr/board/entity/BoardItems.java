@@ -6,7 +6,6 @@ import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.board.entity.item.ItemHits;
 import com.example.rmfr.board.entity.item.ItemLikes;
 import com.example.rmfr.member.entity.Members;
-import com.example.rmfr.member.dto.MemberDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
@@ -16,7 +15,6 @@ import org.hibernate.annotations.GenericGenerator;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Optional;
 
 @Entity
 @Table(name = "boardItems")
@@ -86,19 +84,6 @@ public class BoardItems {
     List<ItemComments> itemComments = new ArrayList<>();
 
     public BoardItems() {}
-
-    public BoardItems(BoardItemsDto boardItemsDto) {
-        this.itemSeq = boardItemsDto.getItemSeq();
-        this.itemHeader = boardItemsDto.getItemHeader();
-        this.itemTitle = boardItemsDto.getItemTitle();
-        this.itemContents = boardItemsDto.getItemContents();
-        this.itemKeywords = boardItemsDto.getItemKeywords();
-        this.itemStatus = boardItemsDto.getItemStatus();
-        this.itemRegUuid = boardItemsDto.getItemRegUuid();
-        this.itemRegDate = boardItemsDto.getItemRegDate();
-        this.itemUpdaterUuid = boardItemsDto.getItemUpdaterUuid();
-        this.itemUpdateDate = boardItemsDto.getItemUpdateDate();
-    }
 
     public static BoardItems of(BoardItemsDto boardItemsDto) {
         BoardItems boardItems = new BoardItems();

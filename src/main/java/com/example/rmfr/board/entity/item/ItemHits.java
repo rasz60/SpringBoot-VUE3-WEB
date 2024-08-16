@@ -23,6 +23,7 @@ public class ItemHits {
     @JoinColumn(referencedColumnName="itemUuid", name = "itemUuid")
     private BoardItems itemUuid;
 
+    // itemHits : 조회 정보 고유번호
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long itemHitId;

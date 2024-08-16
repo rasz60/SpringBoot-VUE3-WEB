@@ -151,12 +151,12 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
     @Override
     public MemberDto getUserInfo(String memId) {
-        MemberDto member = new MemberDto();
+        MemberDto member = null;
         try {
             Optional<Members> mem = memberRepository.findByMemIdAndMemDelYn(memId, "N");
 
             if ( mem.isPresent() ) {
-                member.of(mem.get());
+                member = MemberDto.of(mem.get());
             } else {
                 throw new Exception("MEM_ID NOT FOUND.");
             }

@@ -3,9 +3,7 @@ package com.example.rmfr.board.dto;
 import com.example.rmfr.board.entity.BoardItems;
 import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.member.entity.Members;
-import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 

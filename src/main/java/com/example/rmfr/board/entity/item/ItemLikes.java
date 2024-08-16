@@ -21,6 +21,7 @@ public class ItemLikes {
     @Column(columnDefinition = "VARCHAR(100)")
     private String itemUuid;
 
+    // itemLikeId : 좋아요의 고유번호
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long itemLikeId;

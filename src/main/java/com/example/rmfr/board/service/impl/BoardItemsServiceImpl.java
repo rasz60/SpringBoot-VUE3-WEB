@@ -1,18 +1,13 @@
 package com.example.rmfr.board.service.impl;
 
 import com.example.rmfr.board.dto.BoardItemsDto;
-import com.example.rmfr.board.dto.ItemCommentsDto;
 import com.example.rmfr.board.entity.BoardItems;
-import com.example.rmfr.board.entity.item.ItemComments;
 import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.board.entity.item.ItemHits;
-import com.example.rmfr.board.entity.item.ItemLikes;
 import com.example.rmfr.board.repository.*;
 import com.example.rmfr.board.service.BoardItemsService;
 import com.example.rmfr.board.spec.BoardItemsSpecifications;
-import com.example.rmfr.member.dto.MemberDto;
 import com.example.rmfr.member.entity.Members;
-import com.example.rmfr.member.service.MemberService;
 import com.example.rmfr.result.RestResults;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -78,7 +71,7 @@ public class BoardItemsServiceImpl implements BoardItemsService {
             long seq = boardItemsRepository.count();
 
             boardItemsDto.setItemSeq((int) seq + 1);
-            boardItemsRepository.save(new BoardItems(boardItemsDto));
+            boardItemsRepository.save(BoardItems.of(boardItemsDto));
 
             rst.setResultCode(200);
         } catch(Exception e) {

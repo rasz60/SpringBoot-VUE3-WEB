@@ -5,7 +5,6 @@ import com.example.rmfr.board.entity.item.ItemComments;
 import com.example.rmfr.board.repository.ItemCommentsRepository;
 import com.example.rmfr.board.repository.ItemLikesRepository;
 import com.example.rmfr.board.service.ItemCommentsService;
-import com.example.rmfr.member.dto.MemberDto;
 import com.example.rmfr.member.entity.Members;
 import com.example.rmfr.result.RestResults;
 import lombok.RequiredArgsConstructor;
