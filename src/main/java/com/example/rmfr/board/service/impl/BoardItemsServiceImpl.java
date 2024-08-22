@@ -6,7 +6,6 @@ import com.example.rmfr.board.entity.item.ItemHeaders;
 import com.example.rmfr.board.entity.item.ItemHits;
 import com.example.rmfr.board.repository.*;
 import com.example.rmfr.board.service.BoardItemsService;
-import com.example.rmfr.board.spec.BoardItemsSpecifications;
 import com.example.rmfr.member.entity.Members;
 import com.example.rmfr.result.RestResults;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +27,14 @@ public class BoardItemsServiceImpl implements BoardItemsService {
     private final ItemHeadersRepository itemHeadersRepository;
     private final ItemHitsRepository itemHitsRepository;
     private final ItemLikesRepository itemLikesRepository;
-    private final ItemCommentsRepository itemCommentsRepository;
+
     @Override
     public RestResults getBoardList(int itemStatus, int page, int limit) {
         RestResults rst = new RestResults();
         Page<BoardItemsDto> boardItemsDtos = null;
         try {
-            Page<BoardItems> tmp = boardItemsRepository.findAll(BoardItemsSpecifications.withItemStatus(itemStatus), PageRequest.of(page, limit, Sort.by("itemRegDate").descending()));
+            PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("itemRegDate").descending());
+            Page<BoardItems> tmp = boardItemsRepository.findByItemStatus(itemStatus, pageRequest);
             boardItemsDtos = tmp.map(BoardItemsDto::new);
             rst.setResultCode(200);
             rst.setResult("boardList", boardItemsDtos);

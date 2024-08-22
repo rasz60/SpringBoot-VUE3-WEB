@@ -13,17 +13,10 @@ import ContentView from "@/views/ContentView.vue";
 </template>
 
 <script>
-import { mapActions } from "vuex";
 export default {
   component: {
     HeaderView,
     ContentView,
-  },
-  created() {
-    this.loginChk();
-  },
-  methods: {
-    ...mapActions("common", ["loginChk"]),
   },
 };
 </script>

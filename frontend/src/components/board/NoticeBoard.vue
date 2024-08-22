@@ -31,8 +31,9 @@
       <v-row
         v-for="item in list"
         :key="item"
+        v-show="!notContents"
         class="items"
-        @click="fnMove(`details/` + item.itemSeq)"
+        @click="fnMove(item.itemSeq)"
       >
         <v-col cols="1">{{ item.itemSeq }}</v-col>
         <v-col cols="1">{{ item.itemHeaderName }}</v-col>
@@ -43,6 +44,10 @@
         <v-col cols="2"> {{ item.itemRegDate.replace("T", " ") }} </v-col>
         <v-col cols="1"> {{ item.itemHitsCnt }} </v-col>
         <v-col cols="1"> {{ item.itemLikesCnt }} </v-col>
+      </v-row>
+
+      <v-row class="items" v-show="notContents">
+        <v-col cols="12">게시물을 찾을 수 없습니다.</v-col>
       </v-row>
 
       <v-row>
@@ -64,7 +69,7 @@
             prepend-icon="mdi-plus-box-multiple-outline"
             color="primary"
             variant="tonal"
-            @click="fnMove('form/0')"
+            @click="fnMove()"
           >
             작성
           </v-btn>
@@ -75,98 +80,16 @@
 </template>
 
 <script>
+import NoticeBoardMethods from "@/assets/js/board/NoticeBoardMethods.js";
+import NoticeBoardDatas from "@/assets/js/board/NoticeBoardDatas.js";
 export default {
   name: "NoticeBoard",
   data() {
-    return {
-      itemStatus: 1,
-      list: [],
-      notContents: false,
-      totalPages: 0,
-      page: 0,
-      limit: 10,
-    };
+    return NoticeBoardDatas;
   },
   async created() {
     await this.getBoardList();
   },
-  methods: {
-    async getBoardList() {
-      var pg = this.page != 0 ? this.page - 1 : 0;
-
-      await this.axios
-        .get("/rest/boardList/" + this.itemStatus + "/" + pg + "/" + this.limit)
-        .then((res) => {
-          var rst = res.data;
-          var resultCode = rst.resultCode;
-
-          if (resultCode == 200) {
-            var rstList = rst.result.boardList;
-            this.list = rstList.content;
-
-            if (rstList.content.length > 0) {
-              this.page = rstList.pageable.pageNumber + 1;
-              this.totalPages = rstList.totalPages;
-              this.notContents = false;
-            } else {
-              this.page = 1;
-              this.totalPages = 1;
-              this.notContents = true;
-            }
-          } else {
-            alert(rst.resultMessage);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    fnMove(path) {
-      this.$router.push("./notice/" + path);
-    },
-  },
+  methods: NoticeBoardMethods,
 };
 </script>
-
-<style lang="scss">
-#board {
-  width: 100%;
-
-  div#title {
-    border-left: 6px solid red;
-    padding-left: 2em;
-    margin-left: 1em;
-    margin-top: 1em;
-    margin-bottom: 1.5em;
-  }
-  .v-row {
-    width: 95%;
-    margin-left: 2em;
-    margin-right: 2em;
-
-    .v-col {
-      text-align: center;
-
-      .v-card {
-        padding: 0.4em;
-      }
-    }
-    .v-col.itemTitle {
-      text-align: left;
-    }
-  }
-
-  .v-row.items {
-    border-bottom: 1px solid lightgray;
-  }
-
-  .v-row.items:hover {
-    background-color: rgba(255, 233, 228, 0.2);
-    cursor: pointer;
-
-    span {
-      text-decoration: underline;
-    }
-  }
-}
-</style>

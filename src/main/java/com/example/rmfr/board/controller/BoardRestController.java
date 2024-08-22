@@ -69,8 +69,8 @@ public class BoardRestController {
     }
 
     @GetMapping("/rest/boardList/{itemStatus}/{page}/{limit}")
-    public RestResults getBoardList(@PathVariable(value = "itemStatus") int itemStatus,
-                                    @PathVariable(value = "page") int page,
+    public RestResults getBoardList(@PathVariable("itemStatus") int itemStatus,
+                                    @PathVariable("page") int page,
                                     @PathVariable("limit") int limit) {
         RestResults rst = new RestResults();
         try {
